@@ -6,36 +6,6 @@
 @import "xcode.css";
 @import url("https://use.typekit.net/zmy3izz.css");
 
-:root {
---blue: #007bff;
---indigo: #6610f2;
---purple: #6f42c1;
---pink: #e83e8c;
---red: #dc3545;
---orange: #fd7e14;
---yellow: #ffc107;
---green: #28a745;
---teal: #20c997;
---cyan: #17a2b8;
---white: #fff;
---gray: #6c757d;
---gray-dark: #343a40;
---primary: #B51700;
---secondary: #bbbbbb;
---success: #28a745;
---info: #17a2b8;
---warning: #ffc107;
---danger: #dc3545;
---light: #f8f9fa;
---dark: #343a40;
---breakpoint-xs: 0;
---breakpoint-sm: 480px;
---breakpoint-md: 768px;
---breakpoint-lg: 840px;
---font-family-sans-serif: myriad-pro-1, myriad-pro-2, "Marker Felt" sans-serif;
---font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -43,7 +13,6 @@
 }
 
 html {
-/*    font-family: var(--font-family-sans-serif);*/
     line-height: 1.15;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -85,8 +54,8 @@ header a:hover {
 }
 
 header .wrapper {
-    padding-top: 30px;
-    padding-bottom: 30px;
+    padding-top: 4rem;
+    padding-bottom: 3rem;
     text-align: center;
 }
 
@@ -123,7 +92,7 @@ p {
 }
 
 p.secondary {
-    color: #bbbbbb;
+    color: #6c757d;
 }
 
 ul:not(.item-list) {
@@ -155,7 +124,7 @@ a:hover {
 
 .item-list h1 {
     margin-bottom: 0px;
-    font-size: 1.3em;
+    font-size: 1.5em;
 }
 
 .item-list p {
