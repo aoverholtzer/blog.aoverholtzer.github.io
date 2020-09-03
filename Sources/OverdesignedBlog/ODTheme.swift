@@ -178,7 +178,7 @@ private extension Node where Context == HTML.BodyContext {
         return .header(
             .wrapper(
                 .a(
-                    .href("/blog"),
+                    .href("/"),
                     .b(
                         .text("over")
                     ),
@@ -226,12 +226,12 @@ private extension Node where Context == HTML.BodyContext {
                 .text("&copy; 2020 "),
                 .a(
                     .text("C. Adam Overholtzer"),
-                    .href("/")
+                    .href("https://overdesigned.net")
                 ),
                 .text(" &bull; "),
                 .a(
                     .text("RSS"),
-                    .href("/blog/feed.rss")
+                    .href("/feed.rss")
                 ),
                 .text(" &bull; "),
                 .a(

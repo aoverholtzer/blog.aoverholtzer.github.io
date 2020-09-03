@@ -15,7 +15,7 @@ struct OverdesignedBlog: Website {
     }
 
     // Update these properties to configure your website:
-    var url = URL(string: "https://your-website-url.com")!
+    var url = URL(string: "https://blog.overdesigned.com")!
     var name = "overdesigned blog"
     var description = "A blog by Adam Overholtzer"
     var language: Language { .english }
