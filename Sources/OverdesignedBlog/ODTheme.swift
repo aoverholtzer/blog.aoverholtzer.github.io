@@ -17,7 +17,6 @@ public extension Theme {
             resourcePaths: [
                 "Resources/ODTheme/styles.css",
                 "Resources/ODTheme/xcode.css",
-                "Resources/ODTheme/solarized-dark.css",
             ]
         )
     }
