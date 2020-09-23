@@ -66,7 +66,7 @@ struct ContentView: View {
 }
 ```
 
-WatchOS 7 added support for toolbars on all platforms, which we should use instead of shoving ToolbarView() into the top of the List. 
+SwiftUI 2 added support for toolbars on all platforms, which we should use instead of shoving `ToolbarView()` into the top of the `List`. 
 
 In case you're not familiar with the `.toolbar()` view modifier, here is an implementation that does *not* support watchOS 6:
 
@@ -120,7 +120,7 @@ Why isn't there a better way?!
 
 ## Inspiration: Conditional view modifier
 
-You may have seen [Federico Zanetello's Conditional View Modifier](https://fivestars.blog/swiftui/conditional-modifiers.html), which takes a conditional and a closure as input:
+You may have seen [Federico Zanetello's Conditional View Modifier](https://fivestars.blog/swiftui/conditional-modifiers.html), which takes a conditional and a closure as input, e.g.:
 
 ```swift
 extension View {
