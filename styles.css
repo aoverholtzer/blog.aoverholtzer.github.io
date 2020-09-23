@@ -109,6 +109,18 @@ a:hover {
     text-decoration: underline;
 }
 
+blockquote {
+    padding-left: 1em;
+    border-left: 1pt solid #6c757d;
+    color: #6c757d;
+}
+
+h1 code, h2 code, h3 code, p code, li code {
+    background: #eeeeee;
+    padding: 2pt 3pt;
+    border-radius: 2pt;
+}
+
 .description {
     margin-bottom: 40px;
 }
