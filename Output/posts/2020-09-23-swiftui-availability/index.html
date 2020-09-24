@@ -3,24 +3,40 @@
         <span class="hljs-keyword">return</span> modifier(<span class="hljs-keyword">self</span>)
     }
 }
-</code></pre><p>What is it good for? Why, platform availability checks!</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+</code></pre><p>What is it good for? Combining view modifiers with platform availability checks!</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
     <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
         <span class="hljs-type">Text</span>(<span class="hljs-string">"Hello, world!"</span>)
-            .modify {
-                <span class="hljs-keyword">if</span> #available(watchOS <span class="hljs-number">7</span>, *) {
-                    $<span class="hljs-number">0</span>.textCase(.uppercase)
-                } <span class="hljs-keyword">else</span> {
-                    $<span class="hljs-number">0</span>
-                }
+        .modify {
+            <span class="hljs-keyword">if</span> #available(watchOS <span class="hljs-number">7</span>, *) {
+                $<span class="hljs-number">0</span>.textCase(.uppercase)
+            } <span class="hljs-keyword">else</span> {
+                $<span class="hljs-number">0</span> <span class="hljs-comment">// watchOS 6 fallback</span>
             }
+        }
     }
+}
+</code></pre><p>You can really go nuts with it if you're so inclined…</p><pre data-language="swift"><code><span class="hljs-type">Picker</span>(<span class="hljs-string">"Pick One"</span>, selection: $option) {
+    ...
+}
+.modify {
+    #<span class="hljs-keyword">if</span> os(watchOS)
+        <span class="hljs-keyword">if</span> #available(watchOS <span class="hljs-number">7</span>, *) {
+            $<span class="hljs-number">0</span>.pickerStyle(<span class="hljs-type">InlinePickerStyle</span>())
+        } <span class="hljs-keyword">else</span> { 
+            $<span class="hljs-number">0</span>.pickerStyle(<span class="hljs-type">DefaultPickerStyle</span>())
+        }
+    #elseif targetEnvironment(macCatalyst)
+        $<span class="hljs-number">0</span>.pickerStyle(<span class="hljs-type">DefaultPickerStyle</span>())
+    #<span class="hljs-keyword">else</span> 
+        $<span class="hljs-number">0</span>.pickerStyle(<span class="hljs-type">WheelPickerStyle</span>())
+    #endif
 }
 </code></pre><h2>Why do we need this?</h2><p>iOS 14, watchOS 7, and macOS 11 have brought major updates to SwiftUI. If you have an app that supports older OS versions, then you probably very familiar with <code>#available</code>:</p><pre data-language="swift"><code><span class="hljs-keyword">if</span> #available(watchOS <span class="hljs-number">7</span>, *) {
     <span class="hljs-comment">// the new hotness</span>
 } <span class="hljs-keyword">else</span> {
     <span class="hljs-comment">// old and busted</span>
 }
-</code></pre><p>Unfortunately, doing availability checks with SwiftUI's declarative syntax can be a little messy. Let's look at an example for watchOS.</p><p>Here's a very basic watchOS view, written for watchOS 6:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+</code></pre><p>Unfortunately, doing availability checks with SwiftUI's declarative syntax can be a little messy. In case you haven't tried it, let's look at an example for watchOS.</p><p>Here's a very basic watchOS view, written for watchOS 6:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
     <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
         <span class="hljs-type">List</span> {
             <span class="hljs-type">ToolbarView</span>()
@@ -33,7 +49,7 @@
         }
     }
 }
-</code></pre><p>SwiftUI 2 added support for toolbars on all platforms, which we should use instead of shoving <code>ToolbarView()</code> into the top of the <code>List</code>.</p><p>In case you're not familiar with the <code>.toolbar()</code> view modifier, here is an implementation that does <em>not</em> support watchOS 6:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+</code></pre><p>SwiftUI 2 added support for toolbars on all platforms, which we should use instead of shoving <code>ToolbarView()</code> into the top of the <code>List</code>. Here's what that looks like <em>without</em> support for watchOS 6:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
     <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
         <span class="hljs-type">List</span> {
             <span class="hljs-type">ForEach</span>(<span class="hljs-number">0</span>..&lt;<span class="hljs-number">10</span>) { i <span class="hljs-keyword">in</span>
@@ -47,7 +63,7 @@
         }
     }
 }
-</code></pre><p>To also support watchOS 6, it would be nice if we could wrap the differences in <code>if #available</code> like so:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+</code></pre><p>To also support watchOS 6, it would be nice if we could wrap the differences between these code blocks in <code>if #available</code> like so:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
     <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
         <span class="hljs-type">List</span> {
             <span class="hljs-keyword">if</span> #available(watchOS <span class="hljs-number">7</span>, *) {
@@ -69,7 +85,7 @@
         }
     }
 }
-</code></pre><p>Alas, this code won't compile. The first use of <code>if #available</code> is good but the second — attempting to wrap the <code>.toolbar()</code> view modifier — is no good. We would need to wrap an <code>if-else</code> around the <em>entire</em> <code>List</code>, which means either duplicating a lot of code or refactoring our view. This is a simple example, but I'm sure you can imagine how ugly this can get for more complex views.</p><p>Why isn't there a better way?!</p><h2>Inspiration: Conditional view modifier</h2><p>You may have seen <a href="https://fivestars.blog/swiftui/conditional-modifiers.html">Federico Zanetello's Conditional View Modifier</a>, which takes a conditional and a closure as input, e.g.:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">extension</span> <span class="hljs-title">View</span> </span>{
+</code></pre><p>Alas, this code won't compile. The first use of <code>if #available</code> is good but the second — attempting to wrap the <code>.toolbar()</code> view modifier — does not work. We would need to wrap an <code>if-else</code> around the <em>entire</em> <code>List</code>, which means either duplicating a lot of code or refactoring our view. This is a simple example, but I'm sure you can imagine how ugly this can get for more complex views.</p><p>Why isn't there a better way?!</p><h2>Inspiration: Conditional view modifier</h2><p>You may have seen <a href="https://fivestars.blog/swiftui/conditional-modifiers.html">Federico Zanetello's Conditional View Modifier</a>, which takes a conditional and a closure as input:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">extension</span> <span class="hljs-title">View</span> </span>{
     @<span class="hljs-type">ViewBuilder</span>
     <span class="hljs-function"><span class="hljs-keyword">func</span> `<span class="hljs-title">if</span>`&lt;Transform: View&gt;<span class="hljs-params">(<span class="hljs-number">_</span> condition: Bool, 
                                  transform: <span class="hljs-params">(<span class="hljs-keyword">Self</span>)</span></span></span> -&gt; <span class="hljs-type">Transform</span>) -&gt; some <span class="hljs-type">View</span> {
@@ -80,17 +96,17 @@
         }
     }
 }
-</code></pre><p>This lets us <em>optionally</em> apply a view modifier, which is great for view modifiers that don't take any input:</p><pre data-language="swift"><code><span class="hljs-type">Text</span>(<span class="hljs-string">"Button \(i)"</span>)
-    .<span class="hljs-keyword">if</span>(i &lt; <span class="hljs-number">5</span>) { 
-        $<span class="hljs-number">0</span>.hidden() 
-    }
+</code></pre><p>This lets us <em>optionally</em> apply a view modifier, which is great for view modifiers that don't take any input, e.g.:</p><pre data-language="swift"><code><span class="hljs-type">Text</span>(<span class="hljs-string">"Button \(i)"</span>)
+.<span class="hljs-keyword">if</span>(i &lt; <span class="hljs-number">5</span>) { 
+    $<span class="hljs-number">0</span>.hidden() 
+}
 </code></pre><p>Unfortunately, as Federico explains, this trick won't work for availability checks:</p><blockquote>
 <ul>
 <li>Swift’s #available and @available cannot be passed as arguments in our if modifier</li>
 <li>we can’t guarantee the compiler that our transform function would be applied only on iOS 14/13.4 and later</li>
 </ul>
 <p>If you find a way, I would love to know!</p>
-</blockquote><p>Well Federico, I found a way!</p><h2>Closure view modifier</h2><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">extension</span> <span class="hljs-title">View</span> </span>{
+</blockquote><p>Well Federico, I think I found a way.</p><h2>Closure view modifier</h2><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">extension</span> <span class="hljs-title">View</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">modify</span>&lt;T: View&gt;<span class="hljs-params">(@ViewBuilder <span class="hljs-number">_</span> modifier: <span class="hljs-params">(<span class="hljs-keyword">Self</span>)</span></span></span> -&gt; <span class="hljs-type">T</span>) -&gt; some <span class="hljs-type">View</span> {
         <span class="hljs-keyword">return</span> modifier(<span class="hljs-keyword">self</span>)
     }
@@ -122,4 +138,4 @@
         }
     }
 }
-</code></pre><p>That may not be pretty, but it works!</p><p>(If you find a more elegant solution, please <a href="https://twitter.com/aoverholtzer">let me know</a>.)</p></div><p class="secondary">Posted by Adam Overholtzer on September 23, 2020</p></article></div><footer><p>&copy; 2020 <a href="https://overdesigned.net">C. Adam Overholtzer</a> &bull; <a href="/feed.rss">RSS</a> &bull; <a href="mailto:adam@overdesigned.net">Contact</a></p></footer></body></html>
+</code></pre><p>It may not be pretty, but it works.</p><p>(If you do find a more elegant solution, please <a href="https://twitter.com/aoverholtzer">let me know</a>.)</p></div><p class="secondary">Posted by Adam Overholtzer on September 23, 2020</p></article></div><footer><p>&copy; 2020 <a href="https://overdesigned.net">C. Adam Overholtzer</a> &bull; <a href="/feed.rss">RSS</a> &bull; <a href="https://twitter.com/aoverholtzer">Contact</a></p></footer></body></html>

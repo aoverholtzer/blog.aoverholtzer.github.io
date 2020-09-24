@@ -235,7 +235,7 @@ private extension Node where Context == HTML.BodyContext {
                 .text(" &bull; "),
                 .a(
                     .text("Contact"),
-                    .href("mailto:adam@overdesigned.net")
+                    .href("https://twitter.com/aoverholtzer")
                 )
             )
         )

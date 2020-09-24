@@ -16,23 +16,44 @@ extension View {
 }
 ```
 
-What is it good for? Why, platform availability checks!
+What is it good for? Combining view modifiers with platform availability checks!
 
 ```swift
 struct ContentView: View {
     var body: some View {
         Text("Hello, world!")
-            .modify {
-                if #available(watchOS 7, *) {
-                    $0.textCase(.uppercase)
-                } else {
-                    $0
-                }
+        .modify {
+            if #available(watchOS 7, *) {
+                $0.textCase(.uppercase)
+            } else {
+                $0 // watchOS 6 fallback
             }
+        }
     }
 }
-
 ```
+
+You can really go nuts with it if you're so inclined…
+
+```swift
+Picker("Pick One", selection: $option) {
+    ...
+}
+.modify {
+    #if os(watchOS)
+        if #available(watchOS 7, *) {
+            $0.pickerStyle(InlinePickerStyle())
+        } else { 
+            $0.pickerStyle(DefaultPickerStyle())
+        }
+    #elseif targetEnvironment(macCatalyst)
+        $0.pickerStyle(DefaultPickerStyle())
+    #else 
+        $0.pickerStyle(WheelPickerStyle())
+    #endif
+}
+```
+
 
 ## Why do we need this?
 
@@ -46,7 +67,7 @@ if #available(watchOS 7, *) {
 }
 ```
 
-Unfortunately, doing availability checks with SwiftUI's declarative syntax can be a little messy. Let's look at an example for watchOS. 
+Unfortunately, doing availability checks with SwiftUI's declarative syntax can be a little messy. In case you haven't tried it, let's look at an example for watchOS. 
 
 Here's a very basic watchOS view, written for watchOS 6:
 
@@ -66,9 +87,7 @@ struct ContentView: View {
 }
 ```
 
-SwiftUI 2 added support for toolbars on all platforms, which we should use instead of shoving `ToolbarView()` into the top of the `List`. 
-
-In case you're not familiar with the `.toolbar()` view modifier, here is an implementation that does *not* support watchOS 6:
+SwiftUI 2 added support for toolbars on all platforms, which we should use instead of shoving `ToolbarView()` into the top of the `List`.  Here's what that looks like *without* support for watchOS 6:
 
 ```swift
 struct ContentView: View {
@@ -87,7 +106,7 @@ struct ContentView: View {
 }
 ```
 
-To also support watchOS 6, it would be nice if we could wrap the differences in `if #available` like so:
+To also support watchOS 6, it would be nice if we could wrap the differences between these code blocks in `if #available` like so:
 
 ```swift
 struct ContentView: View {
@@ -114,13 +133,13 @@ struct ContentView: View {
 }
 ```
 
-Alas, this code won't compile. The first use of `if #available` is good but the second — attempting to wrap the `.toolbar()` view modifier — is no good. We would need to wrap an `if-else` around the *entire* `List`, which means either duplicating a lot of code or refactoring our view. This is a simple example, but I'm sure you can imagine how ugly this can get for more complex views. 
+Alas, this code won't compile. The first use of `if #available` is good but the second — attempting to wrap the `.toolbar()` view modifier — does not work. We would need to wrap an `if-else` around the *entire* `List`, which means either duplicating a lot of code or refactoring our view. This is a simple example, but I'm sure you can imagine how ugly this can get for more complex views. 
 
 Why isn't there a better way?!
 
 ## Inspiration: Conditional view modifier
 
-You may have seen [Federico Zanetello's Conditional View Modifier](https://fivestars.blog/swiftui/conditional-modifiers.html), which takes a conditional and a closure as input, e.g.:
+You may have seen [Federico Zanetello's Conditional View Modifier](https://fivestars.blog/swiftui/conditional-modifiers.html), which takes a conditional and a closure as input:
 
 ```swift
 extension View {
@@ -136,13 +155,13 @@ extension View {
 }
 ```
 
-This lets us *optionally* apply a view modifier, which is great for view modifiers that don't take any input:
+This lets us *optionally* apply a view modifier, which is great for view modifiers that don't take any input, e.g.:
 
 ```swift
 Text("Button \(i)")
-    .if(i < 5) { 
-        $0.hidden() 
-    }
+.if(i < 5) { 
+    $0.hidden() 
+}
 ```
 
 Unfortunately, as Federico explains, this trick won't work for availability checks:
@@ -155,7 +174,7 @@ Unfortunately, as Federico explains, this trick won't work for availability chec
 <p>If you find a way, I would love to know!</p>
 </blockquote>
 
-Well Federico, I found a way!
+Well Federico, I think I found a way.
 
 ## Closure view modifier
 
@@ -199,6 +218,6 @@ struct ContentView: View {
 }
 ```
 
-That may not be pretty, but it works!
+It may not be pretty, but it works. 
 
-(If you find a more elegant solution, please [let me know](https://twitter.com/aoverholtzer).)
+(If you do find a more elegant solution, please [let me know](https://twitter.com/aoverholtzer).)
