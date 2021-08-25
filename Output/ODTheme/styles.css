@@ -59,6 +59,12 @@ header .wrapper {
     text-align: center;
 }
 
+header p.secondary {
+    color: #bbbbbb;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
 /*header .site-name {*/
 /*    font-size: 3rem;*/
 /*/*    font-weight: bold;*/*/
@@ -234,6 +240,13 @@ footer a {
 pre[data-language] {
     overflow-x: scroll;
     -webkit-overflow-scrolling: touch;
+    padding: 1em;
+    border: solid 1pt gainsboro;
+    border-radius: 0.5em;
+    margin: 12px 0;
+}
+
+img {
     padding: 1em;
     border: solid 1pt gainsboro;
     border-radius: 0.5em;

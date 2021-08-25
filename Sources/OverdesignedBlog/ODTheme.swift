@@ -184,6 +184,10 @@ private extension Node where Context == HTML.BodyContext {
                     .text("designed"),
                     .text(" "),
                     .text("blog")
+                ),
+                .p(
+                    .class("secondary"),
+                    .text("by Adam Overholtzer")
                 )
             )
         )
