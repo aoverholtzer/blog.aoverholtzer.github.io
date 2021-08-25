@@ -85,13 +85,13 @@ nav li a.selected {
 }
 
 h1 {
-    margin-bottom: 1em;
+    margin-bottom: 20px;
     font-size: 2em;
     line-height: 1.25
 }
 
 h2 {
-    margin: 2em 0 1em;
+    margin: 30px 0 10px;
     line-height: 1.25
 }
 h1 + h2 {
@@ -110,7 +110,7 @@ p.secondary {
     color: #6c757d;
 }
 
-ul:not(.item-list) {
+ul:not(.item-list), ol:not(.item-list) {
     padding-left: 20px;
     margin-bottom: 10px;
 }
@@ -244,11 +244,31 @@ pre[data-language] {
     border: solid 1pt gainsboro;
     border-radius: 0.5em;
     margin: 12px 0;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 img {
-    padding: 1em;
+    padding: 10px;
     border: solid 1pt gainsboro;
-    border-radius: 0.5em;
+    border-radius: 6px;
     margin: 12px 0;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+figure {
+    padding: 10px;
+    border: solid 1pt gainsboro;
+    border-radius: 6px;
+    margin: 12px 0;
+    box-sizing: border-box;
+    width: 100%;
+}
+figure > img {
+    display: block;
+    margin: 0 auto;
+    padding: 0;
+    border: none;
+    border-radius: 0;
 }
