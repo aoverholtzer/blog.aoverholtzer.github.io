@@ -4,11 +4,11 @@ description: How to create a standalone “status menu” app and embed it in yo
 ---
 # Standalone Status Menu in a Mac Catalyst App
 
-<figure><img src="/images/cheatsheet-menu.png" srcset="/images/cheatsheet-menu.png 2x" alt="Screenshot of Cheatsheet’s status menu" /></figure>
+<figure><img src="/images/cheatsheet-menu.jpg" srcset="/images/cheatsheet-menu.jpg 2x" alt="Screenshot of Cheatsheet’s status menu" /></figure>
 
-I make a somewhat successful app called Cheatsheet, which is available for iOS, watchOS, and — thanks to Catalyst — macOS. Cheatsheet makes it easy to get to your notes from anywhere, which means widgets and custom keyboards on iOS and complications on watchOS. On macOS, Cheatsheet has a *status menu app*. 
+I make a somewhat successful app called [Cheatsheet](https://itunes.apple.com/app/id1468213484), which is available for iOS, watchOS, and — thanks to Catalyst — macOS. Cheatsheet makes it easy to get to your notes from anywhere, which means widgets and custom keyboards on iOS and complications on watchOS. On macOS, Cheatsheet has a *status menu app*. 
 
-Embedding a status menu app in a Catalyst app is a bit of a trick, and [apparently](https://twitter.com/stroughtonsmith/status/1429970709791522817?ref_src=twsrc%5Etfw) folks want to know how I did it. So here’s how!
+Embedding a status menu app in a Catalyst app is a bit of a trick, and [apparently](https://twitter.com/stroughtonsmith/status/1429970709791522817?ref_src=twsrc%5Etfw) folks want to know how I did it. Here’s how!
 
 
 ## What is a Status Menu?
@@ -94,11 +94,13 @@ Now all we need is to add `togglePopover(sender:)` to **AppDelegate.swift**:
 }
 ```
 
-This simply shows the popover relative to the status item, or closes the popover if it’s already showing.
+This shows the popover relative to the status item, or closes the popover if it’s already showing.
 
 At this point, you should be able to **Run** your status menu target. The little tornado icon should appear in the menu bar, and clicking it should show a popover.
 
 ## Add to Catalyst Project
+
+Now let’s switch back to our main target, which is our Mac Catalyst app. How do we embed our little status menu app into our main app?
 
 1. Add menu’s product to dependencies
 2. add “copy” build stage
