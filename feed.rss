@@ -1,4 +1,94 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content"><channel><title>overdesigned blog</title><description>A blog by Adam Overholtzer</description><link>https://blog.overdesigned.net</link><language>en</language><lastBuildDate>Wed, 23 Sep 2020 20:20:15 -0700</lastBuildDate><pubDate>Wed, 23 Sep 2020 20:20:15 -0700</pubDate><ttl>250</ttl><atom:link href="https://blog.overdesigned.net/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://blog.overdesigned.net/posts/2020-09-23-swiftui-availability</guid><title>SwiftUI View Modifiers and if #available</title><description>Doing availability checks with SwiftUI's declarative syntax can be a little messy. Here's a custom view modifier that can help.</description><link>https://blog.overdesigned.net/posts/2020-09-23-swiftui-availability</link><pubDate>Wed, 23 Sep 2020 09:41:00 -0700</pubDate><content:encoded><![CDATA[<h1>SwiftUI View Modifiers and <code>if #available</code></h1><h2>tl;dr</h2><p>Here is a view modifier that lets you run arbitrary code before returning a modified view:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">extension</span> <span class="hljs-title">View</span> </span>{
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content"><channel><title>overdesigned blog</title><description>A blog by Adam Overholtzer</description><link>https://blog.overdesigned.net</link><language>en</language><lastBuildDate>Thu, 26 Aug 2021 15:00:35 -0700</lastBuildDate><pubDate>Thu, 26 Aug 2021 15:00:35 -0700</pubDate><ttl>250</ttl><atom:link href="https://blog.overdesigned.net/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://blog.overdesigned.net/posts/2021-09-01-catalyst-status-menu</guid><title>Standalone Status Menu in a Mac Catalyst App</title><description>How to create a standalone “status menu” app and embed it in your Mac Catalyst app.</description><link>https://blog.overdesigned.net/posts/2021-09-01-catalyst-status-menu</link><pubDate>Wed, 1 Sep 2021 09:41:00 -0700</pubDate><content:encoded><![CDATA[<h1>Standalone Status Menu in a Mac Catalyst App</h1><figure><img src="https://blog.overdesigned.net/images/cheatsheet-menu.jpg" srcset="/images/cheatsheet-menu.jpg 2x" alt="Screenshot of Cheatsheet’s status menu" /></figure><p>I make a somewhat successful app called <a href="https://itunes.apple.com/app/id1468213484">Cheatsheet</a>, which is available for iOS, watchOS, and — thanks to Catalyst — macOS. Cheatsheet makes it easy to get to your notes from anywhere, which means widgets and custom keyboards on iOS and complications on watchOS. On macOS, Cheatsheet has a <em>status menu app</em>.</p><p>Look up at the righthand side of a Mac’s menu bar and you’ll see a row of icons called <strong>status menus</strong>. Several status menus are provided by macOS, such as the Wi-Fi and Volume controls. Third-party apps can also create status menus to provide easy, always-available access to app features.</p><p>In this post, I will walk you through creating a <strong>status menu app</strong> — a small Mac app that runs separately from its parent app — and embedding it in a <strong>Mac Catalyst app</strong>. The parent app will have a checkbox that shows or hides the status menu, and clicking the status menu icon will show a popover.</p><figure><img src="https://blog.overdesigned.net/images/status-menu-example.jpg" alt="Screenshot of my sample app and status menu" /></figure><h2>Create the Status Menu App</h2><p>Let’s start with the fun part: building the status menu app. We’ll build this new app with <strong>AppKit and SwiftUI</strong>, not iOS or Catalyst. Don’t fret if you’re new to AppKit — this post has all the AppKit code you’ll need, and then you can build the rest of your interface with SwiftUI.</p><p>To begin, select your project and add a new <strong>macOS App</strong> target.</p><figure><img src="https://blog.overdesigned.net/images/menu-mac-app.png" srcset="/images/menu-mac-app.png 2x" alt="Screenshot of a Xcode’s Add Target window" /></figure><p>Then in the “Choose options for your new target” screen, select <strong>Interface: SwiftUI</strong> and <strong>Life Cycle: AppKit App Delegate</strong>. We need the AppDelegate so we can create a windowless app, which is <em>technically</em> possible with the SwiftUI life cycle but it’s a bit of a <a href="https://github.com/zaferarican/menubarpopoverswiftui2">hack</a> and still requires an app delegate.</p><figure><img src="https://blog.overdesigned.net/images/menu-life-cycle.png" srcset="/images/menu-life-cycle.png 2x" alt="Screenshot of a Xcode’s Choose options for your new target window" /></figure><p>Enter a <strong>Product Name</strong> and click <strong>Finish</strong>.</p><p>Now select your new target and switch to its <strong>Info</strong> tab. Add a new property: <strong>Application is agent (UIElement)</strong>. Set its value to <strong>YES</strong>. This cryptically-named property tells macOS to run your app as an “agent”, which means it won’t appear in the Dock or the Force Quit window.</p><figure><img src="https://blog.overdesigned.net/images/menu-uielement.png" srcset="/images/menu-uielement.png 2x" alt="Screenshot of the Info tab of our new target in Xcode" /></figure><p>With that out of the way, we’re ready to code! In the project navigator, open your new target’s <strong>AppDelegate.swift</strong> and look for <code>applicationDidFinishLaunching</code>. It will contain a bunch of placeholder code creating a window — delete all of that and replace it with this:</p><pre data-language="swift"><code><span class="hljs-comment">// AppDelegate.swift</span>
+
+<span class="hljs-meta">@NSApplicationMain</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AppDelegate</span>: <span class="hljs-title">NSObject</span>, <span class="hljs-title">NSApplicationDelegate</span> </span>{
+    
+    <span class="hljs-keyword">var</span> statusItem : <span class="hljs-type">NSStatusItem!</span>
+    <span class="hljs-keyword">var</span> popover : <span class="hljs-type">NSPopover!</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">applicationDidFinishLaunching</span><span class="hljs-params">(<span class="hljs-number">_</span> aNotification: Notification)</span></span> {
+
+        <span class="hljs-comment">// Create the status item</span>
+        statusItem = <span class="hljs-type">NSStatusBar</span>.system.statusItem(withLength: <span class="hljs-type">NSStatusItem</span>.variableLength)
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> statusButton = statusItem?.button {
+            statusButton.image = <span class="hljs-type">NSImage</span>(systemSymbolName: <span class="hljs-string">"tornado"</span>, accessibilityDescription: <span class="hljs-literal">nil</span>)
+            statusButton.action = #selector(togglePopover(sender:))
+            statusButton.target = <span class="hljs-keyword">self</span>
+        }
+        
+        <span class="hljs-comment">// Create the popover</span>
+        popover = <span class="hljs-type">NSPopover</span>()
+        <span class="hljs-keyword">let</span> content = <span class="hljs-type">NSHostingController</span>(rootView: <span class="hljs-type">ContentView</span>())
+        popover.contentViewController = content
+        popover.contentSize = content.view.intrinsicContentSize
+        popover.behavior = .transient
+        popover.animates = <span class="hljs-literal">false</span>
+    }
+}
+</code></pre><p>This code does two things:</p><ol><li>Creates a new <code>NSStatusItem</code> in the system status bar. Status items can have either a drop-down menu or a button; we’ll create a button with a tornado icon that displays a popover when clicked.</li><li>Creates an <code>NSPopover</code> with a SwiftUI view. We set the popover’s <code>behavior</code> to <code>.transient</code>, which means the popover closes if you click anywhere outside of it, and <code>animates</code> to <em>false</em> because I find the default open/close animations to be frustratingly slow. We also set the popover’s <code>contentSize</code> here using the SwiftUI view’s <code>intrinsicContentSize</code> — ideally SwiftUI would size the popover for us, but in my testing it seems we need to set the <code>contentSize</code> before we try to show the popover or its position will be wrong.</li></ol><p>Now all we need is to add <code>togglePopover(sender:)</code> to <strong>AppDelegate.swift</strong>, which either shows the popover relative to the status item, or closes the popover if it’s already showing.</p><pre data-language="swift"><code><span class="hljs-comment">// AppDelegate.swift</span>
+
+<span class="hljs-meta">@objc</span> <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">togglePopover</span><span class="hljs-params">(sender: <span class="hljs-keyword">Any</span>?)</span></span> {
+    <span class="hljs-keyword">guard</span> <span class="hljs-keyword">let</span> statusButton = statusItem.button <span class="hljs-keyword">else</span> { <span class="hljs-keyword">return</span> }
+    
+    <span class="hljs-keyword">if</span> popover.isShown {
+        popover.performClose(sender)
+    } <span class="hljs-keyword">else</span> {
+        popover.show(relativeTo: statusButton.bounds,
+                     of: statusButton,
+                     preferredEdge: <span class="hljs-type">NSRectEdge</span>.maxY)
+    }
+}
+</code></pre><p>At this point, you should be able to <strong>Run</strong> your status menu target. The little tornado icon should appear in the menu bar, and clicking it should show a popover. You’re a Mac developer now!</p><h2>Embed the Status Menu App in the Catalyst App</h2><p>Now let’s switch back to our main target, which is our Mac Catalyst app. We need to bundle our status menu app inside our Catalyst app, which first means adding the status menu target as a dependency of our Catalyst app.</p><p>Go to the Catalyst target’s <strong>Build Phases</strong> tab and open <strong>Dependencies</strong>. Click the plus button and choose the status menu app’s target. Then click the <strong>Platforms</strong> drop-down next to the added dependency and select <strong>macOS</strong> — this tells Xcode to only build the status menu for the Catalyst version of our app.</p><figure><img src="https://blog.overdesigned.net/images/menu-dependencies.png" srcset="/images/menu-dependencies.png 2x" alt="Screenshot of our main target’s Build Phases > Dependencies in Xcode" /></figure><p>Now to actually embed the status menu app. Click the plus button at the top of the <strong>Build Phases</strong> tab and select <strong>New Copy Files Phase</strong>. Expand the new “Copy Phase”, rename it to “Copy Status Menu”, and set its <strong>Destination</strong> to <code>Wrapper</code> and <strong>Subpath</strong> to <code>Contents/Library/LoginItems</code>. Click the plus button to add your status menu app’s product (it should have a name like <code>Your_Status_Menu_Target.app</code>); then in the <strong>Platforms</strong> drop-down, select <strong>macOS</strong>.</p><figure><img src="https://blog.overdesigned.net/images/menu-copy-phase.png" srcset="/images/menu-copy-phase.png 2x" alt="Screenshot of our Copy Files build phase in Xcode" /></figure><p>Now <strong>Run</strong> your Catalyst app. It should compile and run, but you won’t see the status menu because we haven’t done anything to launch it. The final step is to implement the method for enabling the status menu.</p><h2>Set the Status Menu App as a Login Item</h2><p>Status menu apps are usually run as <strong>login items</strong>, which means they are launched automatically when a Mac is restarted. Because our Catalyst app is sandboxed, the only way to set a login item is to call this method from the <code>ServiceManagement</code> framework:</p><pre data-language="c"><code><span class="hljs-function">Boolean <span class="hljs-title">SMLoginItemSetEnabled</span><span class="hljs-params">(CFStringRef identifier, Boolean enabled)</span></span>;
+</code></pre><p>That’s a global C function and it’s marked as <code>unavailable</code> in iOS and Catalyst. Thankfully, this is easy to work around: just add the function definition to your Catalyst app’s <strong>bridging header</strong> (<a href="https://mycodetips.com/ios/manually-adding-swift-bridging-header-1290.html">add one</a> if you don’t have one).</p><pre data-language="swift"><code><span class="hljs-comment">// CatalystApp-Bridging-Header.h</span>
+#ifndef <span class="hljs-type">CatalystApp</span>-<span class="hljs-type">Bridging</span>-<span class="hljs-type">Header_h</span>
+#define <span class="hljs-type">CatalystApp</span>-<span class="hljs-type">Bridging</span>-<span class="hljs-type">Header_h</span>
+#include &lt;<span class="hljs-type">CoreFoundation</span>/<span class="hljs-type">CoreFoundation</span>.h&gt;
+
+<span class="hljs-comment">// other Objective-C imports here...</span>
+
+<span class="hljs-type">Boolean</span>
+<span class="hljs-type">SMLoginItemSetEnabled</span>(<span class="hljs-type">CFStringRef</span> identifier, <span class="hljs-type">Boolean</span> enabled);
+
+#endif
+</code></pre><p>Sticking that in a header file will convince the compiler that calling <code>SMLoginItemSetEnabled(_:_:)</code> is okay. To use it, just import <code>ServiceManagement</code> and pass in your status menu app’s <strong>bundle identifier</strong> as <code>CFString</code>. The function will return <code>true</code> if the login item is successfully enabled/disabled, or return <code>false</code> if it couldn’t find an embedded app with the given bundle ID.</p><pre data-language="swift"><code><span class="hljs-keyword">import</span> SwiftUI
+<span class="hljs-keyword">import</span> ServiceManagement
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StatusMenuHelper</span>: <span class="hljs-title">ObservableObject</span> </span>{
+    
+    <span class="hljs-keyword">private</span> <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">setStatusMenuEnabled</span><span class="hljs-params">(<span class="hljs-number">_</span> isEnabled: Bool)</span></span> -&gt; <span class="hljs-type">Bool</span> {
+        <span class="hljs-keyword">let</span> bundleId = <span class="hljs-string">"status_menu_app_bundle_id"</span> <span class="hljs-keyword">as</span> <span class="hljs-type">CFString</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-type">SMLoginItemSetEnabled</span>(bundleId, isEnabled)
+    }
+    
+    @<span class="hljs-type">AppStorage</span>(<span class="hljs-string">"status-menu-is-enabled"</span>)
+    <span class="hljs-keyword">var</span> isEnabled = <span class="hljs-literal">false</span> {
+        <span class="hljs-keyword">didSet</span> {
+            <span class="hljs-keyword">if</span> setStatusMenuEnabled(isEnabled) {
+                <span class="hljs-comment">// success!</span>
+            } <span class="hljs-keyword">else</span> {
+                <span class="hljs-comment">// SMLoginItemSetEnabled failed</span>
+                isEnabled = <span class="hljs-literal">false</span>
+            }
+        }
+    }
+}
+</code></pre><p>For convenience, I also created an <code>isEnabled</code> property using AppStorage so the enabled state is saved to UserDefaults. Now all that’s left to do is bind <code>isEnabled</code> to a Toggle in our Catalyst app’s interface:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">CatalystAppView</span>: <span class="hljs-title">View</span> </span>{
+    
+    #<span class="hljs-keyword">if</span> targetEnvironment(macCatalyst)
+    @<span class="hljs-type">StateObject</span> <span class="hljs-keyword">var</span> statusMenuHelper = <span class="hljs-type">StatusMenuHelper</span>()
+    #endif
+    
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        <span class="hljs-type">VStack</span> {
+            #<span class="hljs-keyword">if</span> targetEnvironment(macCatalyst)
+            <span class="hljs-type">Toggle</span>(<span class="hljs-string">"Enable Status Menu"</span>, isOn: $statusMenuHelper.isEnabled)
+            #endif
+            
+            ...
+        }
+    }
+}
+</code></pre><p>And that’s it! Flipping that toggle <em>on</em> should show the status menu, and if you restart your computer the status menu should automatically relaunch. The full sample project for this post is available on <a href="https://github.com/aoverholtzer/CatalystStatusMenu">GitHub</a>, and check out <a href="https://overdesigned.net/cheatsheet/">Cheatsheet</a> to see a status menu working in a production app. Thanks for reading!</p><figure><img src="https://blog.overdesigned.net/images/status-menu-example.jpg" alt="Screenshot of my sample app and status menu" /></figure>]]></content:encoded></item><item><guid isPermaLink="true">https://blog.overdesigned.net/posts/2020-09-23-swiftui-availability</guid><title>SwiftUI View Modifiers and if #available</title><description>Doing availability checks with SwiftUI's declarative syntax can be a little messy. Here's a custom view modifier that can help.</description><link>https://blog.overdesigned.net/posts/2020-09-23-swiftui-availability</link><pubDate>Wed, 23 Sep 2020 09:41:00 -0700</pubDate><content:encoded><![CDATA[<h1>SwiftUI View Modifiers and <code>if #available</code></h1><h2>tl;dr</h2><p>Here is a view modifier that lets you run arbitrary code before returning a modified view:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">extension</span> <span class="hljs-title">View</span> </span>{
     <span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">modify</span>&lt;T: View&gt;<span class="hljs-params">(@ViewBuilder <span class="hljs-number">_</span> modifier: <span class="hljs-params">(<span class="hljs-keyword">Self</span>)</span></span></span> -&gt; <span class="hljs-type">T</span>) -&gt; some <span class="hljs-type">View</span> {
         <span class="hljs-keyword">return</span> modifier(<span class="hljs-keyword">self</span>)
     }
