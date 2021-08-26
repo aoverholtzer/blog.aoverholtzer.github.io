@@ -2,6 +2,7 @@
 date: 2021-09-01 09:41
 description: How to create a standalone “status menu” app and embed it in your Mac Catalyst app.
 ---
+
 # Standalone Status Menu in a Mac Catalyst App
 
 <figure><img src="/images/cheatsheet-menu.jpg" srcset="/images/cheatsheet-menu.jpg 2x" alt="Screenshot of Cheatsheet’s status menu" /></figure>
@@ -107,13 +108,13 @@ Now **Run** your Catalyst app. It should compile and run, but you won’t see th
 
 ## Set the Status Menu App as a Login Item
 
-We are going to set your embedded status menu app as a **login item**, which will launch the app immediately *and* relaunch it every time the Mac is restarted. We need to call this method from the `ServiceManagement` framework:
+Status menu apps are usually run as **login items**, which means they are launched automatically when a Mac is restarted. We need to call this method from the `ServiceManagement` framework:
 
 ```c
 Boolean SMLoginItemSetEnabled(CFStringRef identifier, Boolean enabled);
 ```
 
-This is actually a C function and it’s marked `unavailable` in Catalyst. Thankfully, this is easy to work around: just add the function definition to your Catalyst app’s **bridging header** ([add one](https://mycodetips.com/ios/manually-adding-swift-bridging-header-1290.html) if you don’t have one).
+That’s a global C function and it’s marked `unavailable` in Catalyst. Thankfully, this is easy to work around: just add the function definition to your Catalyst app’s **bridging header** ([add one](https://mycodetips.com/ios/manually-adding-swift-bridging-header-1290.html) if you don’t have one).
 
 ```swift
 // CatalystApp-Bridging-Header.h
@@ -121,45 +122,62 @@ This is actually a C function and it’s marked `unavailable` in Catalyst. Thank
 #define CatalystApp-Bridging-Header_h
 #include <CoreFoundation/CoreFoundation.h>
 
-...
+// other Objective-C imports here...
 
 Boolean
 SMLoginItemSetEnabled(CFStringRef identifier, Boolean enabled);
+
 #endif
 ```
 
-Seriously, that’s it. To use it, just import `ServiceManagement` and pass in your status menu app’s bundle identifier. The function will return `true` if the login item is successfully enabled or disabled, or return `false` if the function failed.
+Sticking that in a header file will convince the compiler that calling `SMLoginItemSetEnabled(_:_:)` is okay. To use it, just import `ServiceManagement` and pass in your status menu app’s bundle identifier as `CFString`. The function will return `true` if the login item is successfully enabled/disabled, or return `false` if the function failed.
 
 ```swift
+import SwiftUI
 import ServiceManagement
 
-class StatusMenuHelper {
-    func setStatusMenuEnabled(_ isEnabled: Bool) -> Bool {
-        let bundleId = "com.overdesigned.CSMStatusMenu" as CFString
+class StatusMenuHelper: ObservableObject {
+    
+    private func setStatusMenuEnabled(_ isEnabled: Bool) -> Bool {
+        let bundleId = "status_menu_app_bundle_id" as CFString
         return SMLoginItemSetEnabled(bundleId, isEnabled)
+    }
+    
+    @AppStorage("status-menu-is-enabled")
+    var isEnabled = false {
+        didSet {
+            if setStatusMenuEnabled(isEnabled) {
+                // success!
+            } else {
+                // SMLoginItemSetEnabled failed
+                isEnabled = false
+            }
+        }
     }
 }
 ```
 
-And that’s it! 
+In the code above, I also created an `isEnabled` property using AppStorage so the enabled state is saved to UserDefaults. Now all that’s left to do is bind `isEnabled` to a Toggle in our Catalyst app’s interface:
 
+```swift
+struct CatalystAppView: View {
+    
+    #if targetEnvironment(macCatalyst)
+    @StateObject var statusMenuHelper = StatusMenuHelper()
+    #endif
+    
+    var body: some View {
+        VStack {
+            #if targetEnvironment(macCatalyst)
+            Toggle("Enable Status Menu", isOn: $statusMenuHelper.isEnabled)
+            #endif
+            
+            ...
+        }
+    }
+}
+```
 
----
+And that’s it! Flipping that toggle *on* should show the status menu, and if you restart your computer the status menu should automatically relaunch. The full sample project for this post is available on [GitHub](https://github.com/aoverholtzer/CatalystStatusMenu), and check out [Cheatsheet](https://overdesigned.net/cheatsheet/) to see a status menu working in a production app. Thanks for reading!
 
-But don’t worry — issue number one means that issue number two is quite easy to solve!
-
-1. Define SMLoginItemSetEnabled in bridging header
-2. Create StatusMenuHelper
-3. Wire-up UI
-
-And we’re done!
-
-
-<blockquote class="twitter-tweet" data-dnt="true"><p lang="en" dir="ltr">that’s a good question for <a href="https://twitter.com/aoverholtzer?ref_src=twsrc%5Etfw">@aoverholtzer</a>, who’s done exactly that in <a href="https://twitter.com/cheatsheet_app?ref_src=twsrc%5Etfw">@cheatsheet_app</a></p>&mdash; Steve Troughton-Smith (@stroughtonsmith) <a href="https://twitter.com/stroughtonsmith/status/1429970709791522817?ref_src=twsrc%5Etfw">August 24, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-
-## What is a Status Menu?
-
-<figure><img src="/images/status-menu-help.png" srcset="/images/status-menu-help.png 2x" alt="Screenshot of a status menu, courtesy of https://support.apple.com/guide/mac-help/menu-bar-mchlp1446/mac" /></figure>
-
-
-Embedding a status menu app in a Catalyst app is a bit of a trick, and [apparently](https://twitter.com/stroughtonsmith/status/1429970709791522817?ref_src=twsrc%5Etfw) folks want to know how I did it. Here’s how!
+<figure><img src="/images/status-menu-example.jpg" alt="Screenshot of my sample app and status menu" /></figure>
