@@ -8,34 +8,27 @@ description: How to create a standalone “status menu” app and embed it in yo
 
 I make a somewhat successful app called [Cheatsheet](https://itunes.apple.com/app/id1468213484), which is available for iOS, watchOS, and — thanks to Catalyst — macOS. Cheatsheet makes it easy to get to your notes from anywhere, which means widgets and custom keyboards on iOS and complications on watchOS. On macOS, Cheatsheet has a *status menu app*. 
 
-Embedding a status menu app in a Catalyst app is a bit of a trick, and [apparently](https://twitter.com/stroughtonsmith/status/1429970709791522817?ref_src=twsrc%5Etfw) folks want to know how I did it. Here’s how!
-
-
-## What is a Status Menu?
-
-<figure><img src="/images/status-menu-help.png" srcset="/images/status-menu-help.png 2x" alt="Screenshot of a status menu, courtesy of https://support.apple.com/guide/mac-help/menu-bar-mchlp1446/mac" /></figure>
-
 Look up at the righthand side of a Mac’s menu bar and you’ll see a row of icons called **status menus**. Several status menus are provided by macOS, such as the Wi-Fi and Volume controls. Third-party apps can also create status menus to provide easy, always-available access to app features.
 
-In this post, I will walk you through creating a status menu app — a small AppKit app that runs separately from its parent app — and embedding it in a Mac Catalyst app. The parent app will have a checkbox that shows or hides the status menu, and clicking the status menu icon will show a popover. Let’s do it!
+In this post, I will walk you through creating a **status menu app** — a small Mac app that runs separately from its parent app — and embedding it in a Mac Catalyst app. The parent app will have a checkbox that shows or hides the status menu, and clicking the status menu icon will show a popover.
 
 <figure><img src="/images/status-menu-example.jpg" alt="Screenshot of my sample app and status menu" /></figure>
 
 ## Create the Status Menu App
 
-Let’s start with the fun part: building the status menu app. 
+Let’s start with the fun part: building the status menu app. We’ll build this new app with AppKit and SwiftUI, not iOS or Catalyst. Don’t fret if you’re new to AppKit — I’ll give you what you need, and then you can build the rest of your interface with SwiftUI.
 
-Select your project and add a new **Mac App** target.
+To begin, select your project and add a new **Mac App** target.
 
 <figure><img src="/images/menu-mac-app.png" srcset="/images/menu-mac-app.png 2x" alt="Screenshot of a Xcode’s Add Target window" /></figure>
 
-Then in the “Choose options for your new target” screen, select **Interface: SwiftUI** and **Life Cycle: AppKit App Delegate**. We need the AppDelegate so we can create a windowless app, which is *technically* possible with the SwiftUI life cycle but it’s a bit of a [hack](https://github.com/zaferarican/menubarpopoverswiftui2).
+Then in the “Choose options for your new target” screen, select **Interface: SwiftUI** and **Life Cycle: AppKit App Delegate**. We need the AppDelegate so we can create a windowless app, which is *technically* possible with the SwiftUI life cycle but it’s a bit of a [hack](https://github.com/zaferarican/menubarpopoverswiftui2) and still requires an app delegate.
 
 <figure><img src="/images/menu-life-cycle.png" srcset="/images/menu-life-cycle.png 2x" alt="Screenshot of a Xcode’s Choose options for your new target window" /></figure>
 
 Enter a **Product Name** and click **Finish**. 
 
-Now select your new target and switch to its **Info** tab. Add a new property: **Application is agent (UIElement)**. Set its value to **YES**. What does this cryptically-named property do? It tells macOS that your app should be run as an “agent”, which means it won’t appear in the Dock or the Force Quit window.
+Now select your new target and switch to its **Info** tab. Add a new property: **Application is agent (UIElement)**. Set its value to **YES**. This cryptically-named property tells macOS to run your app as an “agent”, which means it won’t appear in the Dock or the Force Quit window.
 
 <figure><img src="/images/menu-uielement.png" srcset="/images/menu-uielement.png 2x" alt="Screenshot of the Info tab of our new target in Xcode" /></figure>
 
@@ -115,3 +108,10 @@ And we’re done!
 
 
 <blockquote class="twitter-tweet" data-dnt="true"><p lang="en" dir="ltr">that’s a good question for <a href="https://twitter.com/aoverholtzer?ref_src=twsrc%5Etfw">@aoverholtzer</a>, who’s done exactly that in <a href="https://twitter.com/cheatsheet_app?ref_src=twsrc%5Etfw">@cheatsheet_app</a></p>&mdash; Steve Troughton-Smith (@stroughtonsmith) <a href="https://twitter.com/stroughtonsmith/status/1429970709791522817?ref_src=twsrc%5Etfw">August 24, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+## What is a Status Menu?
+
+<figure><img src="/images/status-menu-help.png" srcset="/images/status-menu-help.png 2x" alt="Screenshot of a status menu, courtesy of https://support.apple.com/guide/mac-help/menu-bar-mchlp1446/mac" /></figure>
+
+
+Embedding a status menu app in a Catalyst app is a bit of a trick, and [apparently](https://twitter.com/stroughtonsmith/status/1429970709791522817?ref_src=twsrc%5Etfw) folks want to know how I did it. Here’s how!
