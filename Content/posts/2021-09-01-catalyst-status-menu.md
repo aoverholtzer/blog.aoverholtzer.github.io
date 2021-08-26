@@ -107,10 +107,44 @@ Now **Run** your Catalyst app. It should compile and run, but you won’t see th
 
 ## Set the Status Menu App as a Login Item
 
-We are going to set your embedded status menu app as a **login item**, which will launch the app immediately *and* relaunch it every time the Mac is restarted. This will be the ugliest step, for two reasons:
+We are going to set your embedded status menu app as a **login item**, which will launch the app immediately *and* relaunch it every time the Mac is restarted. We need to call this method from the `ServiceManagement` framework:
 
-1. The method is a C function. Not an Objective-C function — it’s straight C.
-2. The method is marked `unavailable` in Catalyst. 
+```c
+Boolean SMLoginItemSetEnabled(CFStringRef identifier, Boolean enabled);
+```
+
+This is actually a C function and it’s marked `unavailable` in Catalyst. Thankfully, this is easy to work around: just add the function definition to your Catalyst app’s **bridging header** ([add one](https://mycodetips.com/ios/manually-adding-swift-bridging-header-1290.html) if you don’t have one).
+
+```swift
+// CatalystApp-Bridging-Header.h
+#ifndef CatalystApp-Bridging-Header_h
+#define CatalystApp-Bridging-Header_h
+#include <CoreFoundation/CoreFoundation.h>
+
+...
+
+Boolean
+SMLoginItemSetEnabled(CFStringRef identifier, Boolean enabled);
+#endif
+```
+
+Seriously, that’s it. To use it, just import `ServiceManagement` and pass in your status menu app’s bundle identifier. The function will return `true` if the login item is successfully enabled or disabled, or return `false` if the function failed.
+
+```swift
+import ServiceManagement
+
+class StatusMenuHelper {
+    func setStatusMenuEnabled(_ isEnabled: Bool) -> Bool {
+        let bundleId = "com.overdesigned.CSMStatusMenu" as CFString
+        return SMLoginItemSetEnabled(bundleId, isEnabled)
+    }
+}
+```
+
+And that’s it! 
+
+
+---
 
 But don’t worry — issue number one means that issue number two is quite easy to solve!
 
