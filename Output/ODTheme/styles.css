@@ -243,7 +243,7 @@ pre[data-language] {
     padding: 1em;
     border: solid 1pt gainsboro;
     border-radius: 0.5em;
-    margin: 12px 0;
+    margin: 15px 0;
     box-sizing: border-box;
     width: 100%;
 }
@@ -252,7 +252,7 @@ img {
     padding: 10px;
     border: solid 1pt gainsboro;
     border-radius: 6px;
-    margin: 12px 0;
+    margin: 15px 0;
     box-sizing: border-box;
     max-width: 100%;
 }
@@ -261,7 +261,7 @@ figure {
     padding: 10px;
     border: solid 1pt gainsboro;
     border-radius: 6px;
-    margin: 12px 0;
+    margin: 15px 0;
     box-sizing: border-box;
     width: 100%;
 }
