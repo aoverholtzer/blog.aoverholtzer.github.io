@@ -15,7 +15,7 @@ Embedding a status menu app in a Catalyst app is a bit of a trick, and [apparent
 
 <figure><img src="/images/status-menu-help.png" srcset="/images/status-menu-help.png 2x" alt="Screenshot of a status menu, courtesy of https://support.apple.com/guide/mac-help/menu-bar-mchlp1446/mac" /></figure>
 
-Look up at the righthand side of a Mac’s menu bar and you’ll see a row of icons called **status menus**. Several status menus are provided by macOS, such as the Wi-Fi and Volume controls. But third-party apps can also create status menus to provide easy, always-available access to app features.
+Look up at the righthand side of a Mac’s menu bar and you’ll see a row of icons called **status menus**. Several status menus are provided by macOS, such as the Wi-Fi and Volume controls. Third-party apps can also create status menus to provide easy, always-available access to app features.
 
 In this post, I will walk you through creating a status menu app — a small AppKit app that runs separately from its parent app — and embedding it in a Mac Catalyst app. The parent app will have a checkbox that shows or hides the status menu, and clicking the status menu icon will show a popover. Let’s do it!
 
