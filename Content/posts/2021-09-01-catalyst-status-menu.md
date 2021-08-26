@@ -91,9 +91,15 @@ This shows the popover relative to the status item, or closes the popover if it�
 
 At this point, you should be able to **Run** your status menu target. The little tornado icon should appear in the menu bar, and clicking it should show a popover.
 
-## Add to Catalyst Project
+## Embed the Status Menu App in the Catalyst App
 
-Now let’s switch back to our main target, which is our Mac Catalyst app. How do we embed our little status menu app into our main app?
+Now let’s switch back to our main target, which is our Mac Catalyst app. We need to *embed* our status menu app in our Catalyst app.
+
+Go to the Catalyst target’s **Build Phases** tab and open **Dependencies**. Click the plus button and choose the status menu app’s target. Then click the **Platforms** drop-down next to the added dependency and select **macOS** — this tells Xcode to only build the status menu for the Catalyst version of our app.
+
+<figure><img src="/images/menu-dependencies.png" srcset="/images/menu-dependencies.png 2x" alt="Screenshot of the our main target’s Build Phases > Dependencies in Xcode" /></figure>
+
+
 
 1. Add menu’s product to dependencies
 2. add “copy” build stage
