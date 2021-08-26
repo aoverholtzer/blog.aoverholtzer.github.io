@@ -187,7 +187,12 @@ private extension Node where Context == HTML.BodyContext {
                 ),
                 .p(
                     .class("secondary"),
-                    .text("by Adam Overholtzer")
+//                    .text("by Adam Overholtzer")
+                    .text("by "),
+                    .a(
+                        .text("Adam Overholtzer"),
+                        .href("https://twitter.com/aoverholtzer")
+                    )
                 )
             )
         )
@@ -226,10 +231,16 @@ private extension Node where Context == HTML.BodyContext {
     static func footer<T: Website>(for site: T) -> Node {
         return .footer(
             .p(
-                .text("&copy; 2020 "),
+                .text("&copy; 2020 C. Adam Overholtzer"),
+                .text(" &bull; "),
                 .a(
-                    .text("C. Adam Overholtzer"),
+                    .text("Home"),
                     .href("https://overdesigned.net")
+                ),
+                .text(" &bull; "),
+                .a(
+                    .text("Blog"),
+                    .href("/")
                 ),
                 .text(" &bull; "),
                 .a(
