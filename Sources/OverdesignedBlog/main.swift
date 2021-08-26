@@ -23,17 +23,17 @@ struct OverdesignedBlog: Website {
     var favicon = Favicon()
 }
 
-// This will generate your website using the built-in Foundation theme:
+// This will generate your website
 try OverdesignedBlog()
 //    .publish(withTheme: .overdesigned,
 //             rssFeedSections: [.posts],
 //             plugins: [ .highlightJS() ])
     .publish(using: [
-    .installPlugin(.highlightJS()),
-    .addMarkdownFiles(),
-    .copyResources(),
-    .generateHTML(withTheme: .overdesigned),
-    .generateRSSFeed(including: [.posts]),
-    //.generateSiteMap()
-    .deploy(using: .gitHub("aoverholtzer/blog.aoverholtzer.github.io"))
-])
+        .installPlugin(.highlightJS()),
+        .addMarkdownFiles(),
+        .copyResources(),
+        .generateHTML(withTheme: .overdesigned),
+        .generateRSSFeed(including: [.posts]),
+        //.generateSiteMap()
+        .deploy(using: .gitHub("aoverholtzer/blog.aoverholtzer.github.io"))
+    ])

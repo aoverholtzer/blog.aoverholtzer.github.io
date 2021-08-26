@@ -1,5 +1,5 @@
 ---
-date: 2021-09-01 09:41
+date: 2021-08-26 09:41
 description: How to create a standalone “status menu” app and embed it in your Mac Catalyst app.
 ---
 
