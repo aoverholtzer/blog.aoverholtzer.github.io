@@ -93,18 +93,26 @@ At this point, you should be able to **Run** your status menu target. The little
 
 ## Embed the Status Menu App in the Catalyst App
 
-Now let’s switch back to our main target, which is our Mac Catalyst app. We need to *embed* our status menu app in our Catalyst app.
+Now let’s switch back to our main target, which is our Mac Catalyst app. We need to *embed* our status menu app in our Catalyst app, which first means adding the status menu as a dependency of our Catalyst app.
 
 Go to the Catalyst target’s **Build Phases** tab and open **Dependencies**. Click the plus button and choose the status menu app’s target. Then click the **Platforms** drop-down next to the added dependency and select **macOS** — this tells Xcode to only build the status menu for the Catalyst version of our app.
 
-<figure><img src="/images/menu-dependencies.png" srcset="/images/menu-dependencies.png 2x" alt="Screenshot of the our main target’s Build Phases > Dependencies in Xcode" /></figure>
+<figure><img src="/images/menu-dependencies.png" srcset="/images/menu-dependencies.png 2x" alt="Screenshot of our main target’s Build Phases > Dependencies in Xcode" /></figure>
 
+Now to actually embed the status menu app. Click the plus button at the top of the **Build Phases** tab and select **New Copy Files Phase**. Expand the new “Copy Phase”, rename it to “Copy Status Menu”, and set its **Destination** to `Wrapper` and **Subpath** to `Contents/Library/LoginItems`. Click the plus button to add your status menu app’s product (it should have a name like `Your_Status_Menu_Target.app`); then in the **Platforms** drop-down, select **macOS**.
 
+<figure><img src="/images/menu-copy-phase.png" srcset="/images/menu-copy-phase.png 2x" alt="Screenshot of our Copy Files build phase in Xcode" /></figure>
 
-1. Add menu’s product to dependencies
-2. add “copy” build stage
+Now **Run** your Catalyst app. It should compile and run, but you won’t see the status menu. The final step is to implement the method for enabling the status menu.
 
-## Add Controls
+## Set the Status Menu App as a Login Item
+
+We are going to set your embedded status menu app as a **login item**, which will launch the app immediately *and* relaunch it every time the Mac is restarted. This will be the ugliest step, for two reasons:
+
+1. The method is a C function. Not an Objective-C function — it’s straight C.
+2. The method is marked `unavailable` in Catalyst. 
+
+But don’t worry — issue number one means that issue number two is quite easy to solve!
 
 1. Define SMLoginItemSetEnabled in bridging header
 2. Create StatusMenuHelper
