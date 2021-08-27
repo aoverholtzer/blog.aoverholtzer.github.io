@@ -258,7 +258,7 @@ img {
 }
 
 figure {
-    padding: 10px;
+    padding: 1px;
     border: solid 1pt gainsboro;
     border-radius: 6px;
     margin: 15px 0;
@@ -270,5 +270,5 @@ figure > img {
     margin: 0 auto;
     padding: 0;
     border: none;
-    border-radius: 0;
+    border-radius: 4px;
 }

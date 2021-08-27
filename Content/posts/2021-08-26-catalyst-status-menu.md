@@ -37,7 +37,7 @@ Now select your new target and switch to its **Info** tab. Add a new property: *
 With that out of the way, we’re ready to code! In the project navigator, open your new target’s **AppDelegate.swift** and look for `applicationDidFinishLaunching`. It will contain a bunch of placeholder code creating a window — delete all of that and replace it with this:
 
 ```swift
-// AppDelegate.swift
+// StatusMenuApp/AppDelegate.swift
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -74,7 +74,7 @@ This code does two things:
 Now all we need is to add `togglePopover(sender:)` to **AppDelegate.swift**, which either shows the popover relative to the status item, or closes the popover if it’s already showing.
 
 ```swift
-// AppDelegate.swift
+// StatusMenuApp/AppDelegate.swift
 
 @objc func togglePopover(sender: Any?) {
     guard let statusButton = statusItem.button else { return }
@@ -116,7 +116,8 @@ Boolean SMLoginItemSetEnabled(CFStringRef identifier, Boolean enabled);
 That’s a global C function and it’s marked as `unavailable` in iOS and Catalyst. Thankfully, this is easy to work around: just add the function definition to your Catalyst app’s **bridging header** ([add one](https://mycodetips.com/ios/manually-adding-swift-bridging-header-1290.html) if you don’t have one).
 
 ```swift
-// CatalystApp-Bridging-Header.h
+// CatalystApp/CatalystApp-Bridging-Header.h
+
 #ifndef CatalystApp-Bridging-Header_h
 #define CatalystApp-Bridging-Header_h
 #include <CoreFoundation/CoreFoundation.h>
@@ -132,6 +133,8 @@ SMLoginItemSetEnabled(CFStringRef identifier, Boolean enabled);
 Sticking that in a header file will convince the compiler that calling `SMLoginItemSetEnabled(_:_:)` is okay. To use it, just import `ServiceManagement` and pass in your status menu app’s **bundle identifier** as `CFString`. The function will return `true` if the login item is successfully enabled/disabled, or return `false` if it couldn’t find an embedded app with the given bundle ID.
 
 ```swift
+// CatalystApp/StatusMenuHelper.swift
+
 import SwiftUI
 import ServiceManagement
 
@@ -159,6 +162,8 @@ class StatusMenuHelper: ObservableObject {
 For convenience, I also created an `isEnabled` property using AppStorage so the enabled state is saved to UserDefaults. Now all that’s left to do is bind `isEnabled` to a Toggle in our Catalyst app’s interface:
 
 ```swift
+// CatalystApp/CatalystAppView.swift
+
 struct CatalystAppView: View {
     
     #if targetEnvironment(macCatalyst)
