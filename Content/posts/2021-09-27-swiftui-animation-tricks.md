@@ -14,25 +14,27 @@ I recently launched **[Time’s Up! Timer](https://overdesigned.net/timesup/)*
 
 ## Use `animation(_:value:)` instead of `.animation(_:)`
 
-We’ve all used SwiftUI’s implicit animation modifier `.animation(_:)`, but I recommend using `animation(_:value:)` instead. This version applies the animation *only* when the specified `value` changes. Otherwise you may get animations you didn’t intend.
+Let’s start with the simplest lesson: always use `animation(_:value:)` for implicit animations. I’m sure we’ve all used SwiftUI’s simpler animation modifier `.animation(_:)`, but  by using `animation(_:value:)` instead, we ensure the animation is *only* applied when the specified `value` changes. Without this, the animation may be applied when other properties change or during animated transitions.
 
 Here’s an excerpt from the code for my timer view, which draws a clock face and a hand. The hand animates when its `angle` changes, thanks to `animation(.interactiveSpring(), value: angle)`.
 
 ```swift
-// TimerClockface.swift
-
-var body: some View {
-    ZStack {
-        makeFace()
+struct TimerClockfaceView: View {
+    @State var angle: Angle
     
-        makeHand()
-            .rotationEffect(angle)
-            .animation(.interactiveSpring(), value: angle)
+    var body: some View {
+        ZStack {
+            makeFace()
+        
+            makeHand()
+                .rotationEffect(angle)
+                .animation(.interactiveSpring(), value: angle)
+        }
     }
 }
 ```
 
-The value-less version of `.animation(_:)` is deprecated as of iOS 15 / macOS 12, so it seems Apple agrees: always use `animation(_:value:)`.
+The value-less version of `.animation(_:)` is deprecated as of iOS 15 / macOS 12, so I guess Apple agrees: always use `animation(_:value:)`.
 
 
 ## Respect your user’s Reduce Motion setting
@@ -40,18 +42,19 @@ The value-less version of `.animation(_:)` is deprecated as of iOS 15 / macOS 12
 Settings &rarr; Accessibility &rarr; Motion &rarr; Reduce Motion.
 
 ```swift
-// TimerClockface.swift
-
-@Environment(\.accessibilityReduceMotion) var reduceMotion
-
-var body: some View {
-    ZStack {
-        makeFace()
-        
-        makeHand()
-            .rotationEffect(angle)
-            .animation(reduceMotion ? .default : .interactiveSpring(),
-                       value: angle)
+struct TimerClockfaceView: View {
+    @State var angle: Angle
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+    
+    var body: some View {
+        ZStack {
+            makeFace()
+            
+            makeHand()
+                .rotationEffect(angle)
+                .animation(reduceMotion ? .default : .interactiveSpring(),
+                           value: angle)
+        }
     }
 }
 ```
@@ -61,16 +64,18 @@ var body: some View {
 Here’s a snippet of code from my main view, which shows the timer, the remaining time as `Text`, and a **Reset** button.
 
 ```swift
-// ContentView.swift
-
-var body: some View {
-    VStack {
-        Text(remainingTimeString)
-            .font(.title)
-        TimerClockface()
-            .aspectRatio(1, contentMode: .fit)
-        Button("Reset") {
-            timer.reset()
+struct ContentView: View {
+    @StateObject var timer: TimesUpTimer
+    
+    var body: some View {
+        VStack {
+            Text(timer.remainingTimeString)
+                .font(.title)
+            TimerClockfaceView()
+                .aspectRatio(1, contentMode: .fit)
+            Button(“Reset”) {
+                timer.reset()
+            }
         }
     }
 }
@@ -84,11 +89,16 @@ Remember we set an implicit animation on our hand, so the rotation of the hand w
 You might think using an explicit `withAnimation` is the answer…
 
 ```swift
-// ContentView.swift
-
-Button("Reset") {
-    withAnimation(.default) {
-        timer.reset()
+struct ContentView: View {
+    @StateObject var timer: TimesUpTimer
+    
+    var body: some View {
+    	...
+        Button(“Reset”) {
+            withAnimation(.default) {
+                timer.reset()
+            }
+        }
     }
 }
 ```
@@ -98,13 +108,18 @@ Button("Reset") {
 The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` is basically an *animation context*, if you’ve worked with those elsewhere. 
 
 ```swift
-// ContentView.swift
-
-Button("Reset") {
-    var transaction = Transaction(animation: .default)
-    transaction.disablesAnimations = true
-    withTransaction(transaction) {
-        timer.reset()
+struct ContentView: View {
+    @StateObject var timer: TimesUpTimer
+    
+    var body: some View {
+        ...
+        Button(“Reset”) {
+            var transaction = Transaction(animation: .default)
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                timer.reset()
+            }
+        }
     }
 }
 ```
@@ -117,33 +132,40 @@ First we create a Transaction with our desired animation (we’ll use a boring o
 Now something unexpected is happening: our `Text` view is animating when we tap **Reset**.
 
 ```swift
-// ContentView.swift
-
-Text(remainingTimeString)
-    .transaction { transaction in
-        transaction.animation = .none
+struct ContentView: View {
+    @StateObject var timer: TimesUpTimer
+    
+    var body: some View {
+    	Text(timer.remainingTimeString)
+    	    .transaction { transaction in
+    	        transaction.animation = .none
+    	    }
+    	...
     }
+}
 ```
 
 
 ## Always test device rotation
 
-Your SwiftUI views will animate to their new sizes when you rotate your device, and this may produce some undesirable results. I recommend testing device rotation in the simulator with **Debug &rarr; Slow Animations** enabled so you can see exactly what’s happening.
+Your SwiftUI views will animate to their new sizes when you rotate your iPhone or iPad, and this may produce some undesirable results. I recommend testing device rotation in the simulator with **Debug &rarr; Slow Animations** enabled so you can see exactly what’s happening.
 
-In my app, rotating the device seems to resize the timer face and hand differently. We can fix this by applying `drawingGroup()` to the `ZStack` that contains both the face and hand.
+In my app, rotating the device seems to resize the timer face and hand differently. I’ll fix this by applying `drawingGroup()` to the `ZStack` that containing those views.
 
 ```swift
-// TimerClockface.swift
-
-var body: some View {
-    ZStack {
-        makeFace()
-        
-        makeHand()
-            .rotationEffect(angle)
-            .animation(.interactiveSpring(), value: angle)
+struct TimerClockfaceView: View {
+    @State var angle: Angle
+    
+    var body: some View {
+        ZStack {
+            makeFace()
+            
+            makeHand()
+                .rotationEffect(angle)
+                .animation(.interactiveSpring(), value: angle)
+        }
+        .drawingGroup()
     }
-    .drawingGroup()
 }
 ```
 

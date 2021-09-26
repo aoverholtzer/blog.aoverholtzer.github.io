@@ -1,74 +1,96 @@
-<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content"><channel><title>overdesigned blog</title><description>A blog by Adam Overholtzer</description><link>https://blog.overdesigned.net</link><language>en</language><lastBuildDate>Mon, 20 Sep 2021 10:19:19 -0700</lastBuildDate><pubDate>Mon, 20 Sep 2021 10:19:19 -0700</pubDate><ttl>250</ttl><atom:link href="https://blog.overdesigned.net/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://blog.overdesigned.net/posts/2021-09-27-swiftui-animation-tricks</guid><title>SwiftUI Animation Lessons From Building “Time’s Up! Timer”</title><description>Here are a few of the SwiftUI animation tips and tricks I’ve learned while building my kid-friendly timer app Time’s Up! Timer.</description><link>https://blog.overdesigned.net/posts/2021-09-27-swiftui-animation-tricks</link><pubDate>Mon, 27 Sep 2021 09:41:00 -0700</pubDate><content:encoded><![CDATA[<figure><img src="https://blog.overdesigned.net/images/times-up-promo.jpg" alt="Screenshot of a Time’s Up! Timer" /></figure><h1>SwiftUI Animation Lessons From Building “Time’s Up! Timer”</h1><p>I recently launched <strong><a href="https://overdesigned.net/timesup/">Time’s Up! Timer</a></strong>, a kid-friendly timer app for iOS, macOS, and tvOS. It’s a SwiftUI app that makes heavy use of animations, so I thought I’d share a few of the SwiftUI animation tips and tricks I’ve learned building it.</p><h2>Use <code>animation(_:value:)</code> instead of <code>.animation(_:)</code></h2><p>We’ve all used SwiftUI’s implicit animation modifier <code>.animation(_:)</code>, but I recommend using <code>animation(_:value:)</code> instead. This version applies the animation <em>only</em> when the specified <code>value</code> changes. Otherwise you may get animations you didn’t intend.</p><p>Here’s an excerpt from the code for my timer view, which draws a clock face and a hand. The hand animates when its <code>angle</code> changes, thanks to <code>animation(.interactiveSpring(), value: angle)</code>.</p><pre data-language="swift"><code><span class="hljs-comment">// TimerClockface.swift</span>
-
-<span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
-    <span class="hljs-type">ZStack</span> {
-        makeFace()
+<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content"><channel><title>overdesigned blog</title><description>A blog by Adam Overholtzer</description><link>https://blog.overdesigned.net</link><language>en</language><lastBuildDate>Sun, 26 Sep 2021 09:45:01 -0700</lastBuildDate><pubDate>Sun, 26 Sep 2021 09:45:01 -0700</pubDate><ttl>250</ttl><atom:link href="https://blog.overdesigned.net/feed.rss" rel="self" type="application/rss+xml"/><item><guid isPermaLink="true">https://blog.overdesigned.net/posts/2021-09-27-swiftui-animation-tricks</guid><title>SwiftUI Animation Lessons From Building “Time’s Up! Timer”</title><description>Here are a few of the SwiftUI animation tips and tricks I’ve learned while building my kid-friendly timer app Time’s Up! Timer.</description><link>https://blog.overdesigned.net/posts/2021-09-27-swiftui-animation-tricks</link><pubDate>Mon, 27 Sep 2021 09:41:00 -0700</pubDate><content:encoded><![CDATA[<figure><img src="https://blog.overdesigned.net/images/times-up-promo.jpg" alt="Screenshot of a Time’s Up! Timer" /></figure><h1>SwiftUI Animation Lessons From Building “Time’s Up! Timer”</h1><p>I recently launched <strong><a href="https://overdesigned.net/timesup/">Time’s Up! Timer</a></strong>, a kid-friendly timer app for iOS, macOS, and tvOS. It’s a SwiftUI app that makes heavy use of animations, so I thought I’d share a few of the SwiftUI animation tips and tricks I’ve learned building it.</p><h2>Use <code>animation(_:value:)</code> instead of <code>.animation(_:)</code></h2><p>We’ve all used SwiftUI’s implicit animation modifier <code>.animation(_:)</code>, but I recommend using <code>animation(_:value:)</code> instead. This version applies the animation <em>only</em> when the specified <code>value</code> changes; without this, implicit animations may be applied at other times, like when the device is rotated.</p><p>Here’s an excerpt from the code for my timer view, which draws a clock face and a hand. The hand animates when its <code>angle</code> changes, thanks to <code>animation(.interactiveSpring(), value: angle)</code>.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TimerClockfaceView</span>: <span class="hljs-title">View</span> </span>{
+    @<span class="hljs-type">State</span> <span class="hljs-keyword">var</span> angle: <span class="hljs-type">Angle</span>
     
-        makeHand()
-            .rotationEffect(angle)
-            .animation(.interactiveSpring(), value: angle)
-    }
-}
-</code></pre><p>The value-less version of <code>.animation(_:)</code> is deprecated as of iOS 15 / macOS 12, so it seems Apple agrees: always use <code>animation(_:value:)</code>.</p><h2>Respect your user’s Reduce Motion setting</h2><p>Settings &rarr; Accessibility &rarr; Motion &rarr; Reduce Motion.</p><pre data-language="swift"><code><span class="hljs-comment">// TimerClockface.swift</span>
-
-@<span class="hljs-type">Environment</span>(\.accessibilityReduceMotion) <span class="hljs-keyword">var</span> reduceMotion
-
-<span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
-    <span class="hljs-type">ZStack</span> {
-        makeFace()
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        <span class="hljs-type">ZStack</span> {
+            makeFace()
         
-        makeHand()
-            .rotationEffect(angle)
-            .animation(reduceMotion ? .<span class="hljs-keyword">default</span> : .interactiveSpring(),
-                       value: angle)
-    }
-}
-</code></pre><h2>Use <code>withTransaction</code> to override implicit animations</h2><p>Here’s a snippet of code from my main view, which shows the timer, the remaining time as <code>Text</code>, and a <strong>Reset</strong> button.</p><pre data-language="swift"><code><span class="hljs-comment">// ContentView.swift</span>
-
-<span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
-    <span class="hljs-type">VStack</span> {
-        <span class="hljs-type">Text</span>(remainingTimeString)
-            .font(.title)
-        <span class="hljs-type">TimerClockface</span>()
-            .aspectRatio(<span class="hljs-number">1</span>, contentMode: .fit)
-        <span class="hljs-type">Button</span>(<span class="hljs-string">"Reset"</span>) {
-            timer.reset()
+            makeHand()
+                .rotationEffect(angle)
+                .animation(.interactiveSpring(), value: angle)
         }
     }
 }
-</code></pre><p>And here’s a screenshot of what happens if we tap <strong>Reset</strong>.</p><p>Remember we set an implicit animation on our hand, so the rotation of the hand will animate using <code>.interactiveSpring()</code> when the <strong>Reset</strong> button is tapped. I think this is way too bouncy to use with <strong>Reset</strong>, so let’s override the implicit animation.</p><p>You might think using an explicit <code>withAnimation</code> is the answer…</p><pre data-language="swift"><code><span class="hljs-comment">// ContentView.swift</span>
-
-<span class="hljs-type">Button</span>(<span class="hljs-string">"Reset"</span>) {
-    withAnimation(.<span class="hljs-keyword">default</span>) {
-        timer.reset()
+</code></pre><p>The value-less version of <code>.animation(_:)</code> is deprecated as of iOS 15 / macOS 12, so it seems Apple agrees: always use <code>animation(_:value:)</code>.</p><h2>Respect your user’s Reduce Motion setting</h2><p>Settings &rarr; Accessibility &rarr; Motion &rarr; Reduce Motion.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TimerClockfaceView</span>: <span class="hljs-title">View</span> </span>{
+    @<span class="hljs-type">State</span> <span class="hljs-keyword">var</span> angle: <span class="hljs-type">Angle</span>
+    @<span class="hljs-type">Environment</span>(\.accessibilityReduceMotion) <span class="hljs-keyword">var</span> reduceMotion
+    
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        <span class="hljs-type">ZStack</span> {
+            makeFace()
+            
+            makeHand()
+                .rotationEffect(angle)
+                .animation(reduceMotion ? .<span class="hljs-keyword">default</span> : .interactiveSpring(),
+                           value: angle)
+        }
     }
 }
-</code></pre><p>… but that doesn’t <em>override</em> the spring animation. The hand still bounces into place.</p><p>The solution is <code>withTransaction</code>, which is similar to <code>withAnimation</code> except it takes a <code>Transaction</code> object. A <code>Transaction</code> is basically an <em>animation context</em>, if you’ve worked with those elsewhere.</p><pre data-language="swift"><code><span class="hljs-comment">// ContentView.swift</span>
-
-<span class="hljs-type">Button</span>(<span class="hljs-string">"Reset"</span>) {
-    <span class="hljs-keyword">var</span> transaction = <span class="hljs-type">Transaction</span>(animation: .<span class="hljs-keyword">default</span>)
-    transaction.disablesAnimations = <span class="hljs-literal">true</span>
-    withTransaction(transaction) {
-        timer.reset()
+</code></pre><h2>Use <code>withTransaction</code> to override implicit animations</h2><p>Here’s a snippet of code from my main view, which shows the timer, the remaining time as <code>Text</code>, and a <strong>Reset</strong> button.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+    @<span class="hljs-type">StateObject</span> <span class="hljs-keyword">var</span> timer: <span class="hljs-type">TimesUpTimer</span>
+    
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        <span class="hljs-type">VStack</span> {
+            <span class="hljs-type">Text</span>(timer.remainingTimeString)
+                .font(.title)
+            <span class="hljs-type">TimerClockfaceView</span>()
+                .aspectRatio(<span class="hljs-number">1</span>, contentMode: .fit)
+            <span class="hljs-type">Button</span>(“<span class="hljs-type">Reset</span>”) {
+                timer.reset()
+            }
+        }
     }
 }
-</code></pre><p>First we create a Transaction with our desired animation (we’ll use a boring old <code>.default</code> animation). Then we set the Transaction’s <code>disablesAnimations</code> property to true, which tells it to override any implicit animations on the affected views (which is what we want). Then we call <code>withTransaction(_:_:)</code> exactly like we would <code>withAnimation(_:_:)</code>, providing our transaction and a closure to execute.</p><h2>Use <code>transaction(_:)</code> to override explicit animations</h2><p>Now something unexpected is happening: our <code>Text</code> view is animating when we tap <strong>Reset</strong>.</p><pre data-language="swift"><code><span class="hljs-comment">// ContentView.swift</span>
-
-<span class="hljs-type">Text</span>(remainingTimeString)
-    .transaction { transaction <span class="hljs-keyword">in</span>
-        transaction.animation = .<span class="hljs-keyword">none</span>
+</code></pre><p>And here’s a screenshot of what happens if we tap <strong>Reset</strong>.</p><p>Remember we set an implicit animation on our hand, so the rotation of the hand will animate using <code>.interactiveSpring()</code> when the <strong>Reset</strong> button is tapped. I think this is way too bouncy to use with <strong>Reset</strong>, so let’s override the implicit animation.</p><p>You might think using an explicit <code>withAnimation</code> is the answer…</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+    @<span class="hljs-type">StateObject</span> <span class="hljs-keyword">var</span> timer: <span class="hljs-type">TimesUpTimer</span>
+    
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+    	...
+        <span class="hljs-type">Button</span>(“<span class="hljs-type">Reset</span>”) {
+            withAnimation(.<span class="hljs-keyword">default</span>) {
+                timer.reset()
+            }
+        }
     }
-</code></pre><h2>Always test device rotation</h2><p>Your SwiftUI views will animate to their new sizes when you rotate your device, and this may produce some undesirable results. I recommend testing device rotation in the simulator with <strong>Debug &rarr; Slow Animations</strong> enabled so you can see exactly what’s happening.</p><p>In my app, rotating the device seems to resize the timer face and hand differently. We can fix this by applying <code>drawingGroup()</code> to the <code>ZStack</code> that contains both the face and hand.</p><pre data-language="swift"><code><span class="hljs-comment">// TimerClockface.swift</span>
-
-<span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
-    <span class="hljs-type">ZStack</span> {
-        makeFace()
-        
-        makeHand()
-            .rotationEffect(angle)
-            .animation(.interactiveSpring(), value: angle)
+}
+</code></pre><p>… but that doesn’t <em>override</em> the spring animation. The hand still bounces into place.</p><p>The solution is <code>withTransaction</code>, which is similar to <code>withAnimation</code> except it takes a <code>Transaction</code> object. A <code>Transaction</code> is basically an <em>animation context</em>, if you’ve worked with those elsewhere.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+    @<span class="hljs-type">StateObject</span> <span class="hljs-keyword">var</span> timer: <span class="hljs-type">TimesUpTimer</span>
+    
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        ...
+        <span class="hljs-type">Button</span>(“<span class="hljs-type">Reset</span>”) {
+            <span class="hljs-keyword">var</span> transaction = <span class="hljs-type">Transaction</span>(animation: .<span class="hljs-keyword">default</span>)
+            transaction.disablesAnimations = <span class="hljs-literal">true</span>
+            withTransaction(transaction) {
+                timer.reset()
+            }
+        }
     }
-    .drawingGroup()
+}
+</code></pre><p>First we create a Transaction with our desired animation (we’ll use a boring old <code>.default</code> animation). Then we set the Transaction’s <code>disablesAnimations</code> property to true, which tells it to override any implicit animations on the affected views (which is what we want). Then we call <code>withTransaction(_:_:)</code> exactly like we would <code>withAnimation(_:_:)</code>, providing our transaction and a closure to execute.</p><h2>Use <code>transaction(_:)</code> to override explicit animations</h2><p>Now something unexpected is happening: our <code>Text</code> view is animating when we tap <strong>Reset</strong>.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+    @<span class="hljs-type">StateObject</span> <span class="hljs-keyword">var</span> timer: <span class="hljs-type">TimesUpTimer</span>
+    
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+    	<span class="hljs-type">Text</span>(timer.remainingTimeString)
+    	    .transaction { transaction <span class="hljs-keyword">in</span>
+    	        transaction.animation = .<span class="hljs-keyword">none</span>
+    	    }
+    	...
+    }
+}
+</code></pre><h2>Always test device rotation</h2><p>Your SwiftUI views will animate to their new sizes when you rotate your device, and this may produce some undesirable results. I recommend testing device rotation in the simulator with <strong>Debug &rarr; Slow Animations</strong> enabled so you can see exactly what’s happening.</p><p>In my app, rotating the device seems to resize the timer face and hand differently. We can fix this by applying <code>drawingGroup()</code> to the <code>ZStack</code> that contains both the face and hand.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TimerClockfaceView</span>: <span class="hljs-title">View</span> </span>{
+    @<span class="hljs-type">State</span> <span class="hljs-keyword">var</span> angle: <span class="hljs-type">Angle</span>
+    
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        <span class="hljs-type">ZStack</span> {
+            makeFace()
+            
+            makeHand()
+                .rotationEffect(angle)
+                .animation(.interactiveSpring(), value: angle)
+        }
+        .drawingGroup()
+    }
 }
 </code></pre><h2>For animation-heavy Mac apps, consider Catalyst</h2><p>We shouldn’t need to use it, and there are some <em>serious</em> downsides — e.g., <code>.toolbar</code> won’t give you Mac toolbars, <code>.commands</code> don’t work at all — but for whatever reason, SwiftUI animations run much, <em>much</em> better in Catalyst.</p><h2>Learn more</h2><p>I recommend SwiftUI Lab’s <strike>three</strike><em>five</em> part series.</p><p>And if any of these tips have helped you, please check out <strong><a href="https://overdesigned.net/timesup/">Time’s Up! Timer</a></strong> and leave a nice review!</p>]]></content:encoded></item><item><guid isPermaLink="true">https://blog.overdesigned.net/posts/2021-08-26-catalyst-status-menu</guid><title>Standalone Status Menu in a Mac Catalyst App</title><description>How to create a standalone “status menu” app and embed it in your Mac Catalyst app.</description><link>https://blog.overdesigned.net/posts/2021-08-26-catalyst-status-menu</link><pubDate>Thu, 26 Aug 2021 09:41:00 -0700</pubDate><content:encoded><![CDATA[<h1>Standalone Status Menu in a Mac Catalyst App</h1><figure><img src="https://blog.overdesigned.net/images/cheatsheet-menu.jpg" srcset="/images/cheatsheet-menu.jpg 2x" alt="Screenshot of Cheatsheet’s status menu" /></figure><p>I make a somewhat successful app called <a href="https://itunes.apple.com/app/id1468213484">Cheatsheet</a>, which is available for iOS, watchOS, and — thanks to Catalyst — macOS. Cheatsheet makes it easy to get to your notes from anywhere, which means widgets and custom keyboards on iOS and complications on watchOS. On macOS, Cheatsheet has a <em>status menu app</em>.</p><p>Look up at the righthand side of a Mac’s menu bar and you’ll see a row of icons called <strong>status menus</strong>. Several status menus are provided by macOS, such as the Wi-Fi and Volume controls. Third-party apps can also create status menus to provide easy, always-available access to app features.</p><p>In this post, I will walk you through creating a <strong>status menu app</strong> — a small Mac app that runs separately from its parent app — and embedding it in a <strong>Mac Catalyst app</strong>. The parent app will have a checkbox that shows or hides the status menu, and clicking the status menu icon will show a popover.</p><figure><img src="https://blog.overdesigned.net/images/status-menu-example.jpg" alt="Screenshot of my sample app and status menu" /></figure><h2>Create the Status Menu App</h2><p>Let’s start with the fun part: building the status menu app. We’ll build this new app with <strong>AppKit and SwiftUI</strong>, not iOS or Catalyst. Don’t fret if you’re new to AppKit — this post has all the AppKit code you’ll need, and then you can build the rest of your interface with SwiftUI.</p><p>To begin, select your project and add a new <strong>macOS App</strong> target.</p><figure><img src="https://blog.overdesigned.net/images/menu-mac-app.png" srcset="/images/menu-mac-app.png 2x" alt="Screenshot of a Xcode’s Add Target window" /></figure><p>Then in the “Choose options for your new target” screen, select <strong>Interface: SwiftUI</strong> and <strong>Life Cycle: AppKit App Delegate</strong>. We need the AppDelegate so we can create a windowless app, which is <em>technically</em> possible with the SwiftUI life cycle but it’s a bit of a <a href="https://github.com/zaferarican/menubarpopoverswiftui2">hack</a> and still requires an app delegate.</p><figure><img src="https://blog.overdesigned.net/images/menu-life-cycle.png" srcset="/images/menu-life-cycle.png 2x" alt="Screenshot of a Xcode’s Choose options for your new target window" /></figure><p>Enter a <strong>Product Name</strong> and click <strong>Finish</strong>.</p><p>Now select your new target and switch to its <strong>Info</strong> tab. Add a new property: <strong>Application is agent (UIElement)</strong>. Set its value to <strong>YES</strong>. This cryptically-named property tells macOS to run your app as an “agent”, which means it won’t appear in the Dock or the Force Quit window.</p><figure><img src="https://blog.overdesigned.net/images/menu-uielement.png" srcset="/images/menu-uielement.png 2x" alt="Screenshot of the Info tab of our new target in Xcode" /></figure><p>With that out of the way, we’re ready to code! In the project navigator, open your new target’s <strong>AppDelegate.swift</strong> and look for <code>applicationDidFinishLaunching</code>. It will contain a bunch of placeholder code creating a window — delete all of that and replace it with this:</p><pre data-language="swift"><code><span class="hljs-comment">// StatusMenuApp/AppDelegate.swift</span>
 
