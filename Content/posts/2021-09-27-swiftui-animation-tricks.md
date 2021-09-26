@@ -14,7 +14,7 @@ I recently launched **[Time’s Up! Timer](https://overdesigned.net/timesup/)*
 
 ## Use `animation(_:value:)` instead of `.animation(_:)`
 
-Let’s start with the simplest lesson: always use `animation(_:value:)` for implicit animations. I’m sure we’ve all used SwiftUI’s simpler animation modifier `.animation(_:)`, but  by using `animation(_:value:)` instead, we ensure the animation is *only* applied when the specified `value` changes. Without this, the animation may be applied when other properties change or during animated transitions.
+Let’s start with the simplest lesson: always use `animation(_:value:)` for implicit animations. Unlike the simpler `.animation(_:)` modifier, this also requires an `Equatable` value parameter and the animation will *only* be applied when that value changes. Without this, the animation may run when other properties change or during animated transitions.
 
 Here’s an excerpt from the code for my timer view, which draws a clock face and a hand. The hand animates when its `angle` changes, thanks to `animation(.interactiveSpring(), value: angle)`.
 
@@ -124,7 +124,7 @@ struct ContentView: View {
 }
 ```
 
-First we create a Transaction with our desired animation (we’ll use a boring old `.default` animation). Then we set the Transaction’s `disablesAnimations` property to true, which tells it to override any implicit animations on the affected views (which is what we want). Then we call `withTransaction(_:_:)` exactly like we would `withAnimation(_:_:)`, providing our transaction and a closure to execute.
+Here we create a Transaction with our desired animation (we’ll use a boring old `.default` animation). Then we set the Transaction’s `disablesAnimations` property to true, which tells it to disable all implicit animations on the affected views, e.g. our hand animation. Finally, we call `withTransaction(_:_:)` like we would `withAnimation(_:_:)`, providing our transaction and a closure to execute.
 
 
 ## Use `transaction(_:)` to override explicit animations
