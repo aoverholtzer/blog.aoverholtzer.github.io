@@ -73,7 +73,7 @@ struct ContentView: View {
                 .font(.title)
             TimerClockfaceView()
                 .aspectRatio(1, contentMode: .fit)
-            Button(“Reset”) {
+            Button("Reset") {
                 timer.reset()
             }
         }
@@ -81,7 +81,7 @@ struct ContentView: View {
 }
 ```
 
-And here’s a screenshot of what happens if we tap **Reset**.
+And here’s a screenshot of what happens when I tap **Reset**.
 
 
 Remember we set an implicit animation on our hand, so the rotation of the hand will animate using `.interactiveSpring()` when the **Reset** button is tapped. I think this is way too bouncy to use with **Reset**, so let’s override the implicit animation.
@@ -94,7 +94,7 @@ struct ContentView: View {
     
     var body: some View {
     	...
-        Button(“Reset”) {
+        Button("Reset") {
             withAnimation(.default) {
                 timer.reset()
             }
@@ -113,7 +113,7 @@ struct ContentView: View {
     
     var body: some View {
         ...
-        Button(“Reset”) {
+        Button("Reset") {
             var transaction = Transaction(animation: .default)
             transaction.disablesAnimations = true
             withTransaction(transaction) {
