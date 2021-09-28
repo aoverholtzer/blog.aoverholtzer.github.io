@@ -21,7 +21,7 @@
             
             makeHand()
                 .rotationEffect(angle)
-                .animation(reduceMotion ? .<span class="hljs-keyword">default</span> : .interactiveSpring(),
+                .animation(reduceMotion ? .<span class="hljs-keyword">none</span> : .interactiveSpring(),
                            value: angle)
         }
     }
@@ -43,7 +43,7 @@
         }
     }
 }
-</code></pre><p>And here’s a screenshot of what happens when I tap <strong>Reset</strong>.</p><p>Remember we set an implicit <code>.interactiveSpring()</code> animation on the clock hand hand, and we can see the <code>withAnimation(.default)</code> is ignored in favor of the spring animation. How can we <em>override</em> the spring animation instead?</p><p>The solution is <code>withTransaction</code>, which is similar to <code>withAnimation</code> except it takes a <code>Transaction</code> object. A <code>Transaction</code> is basically an <em>animation context</em>, if you’ve worked with those elsewhere.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+</code></pre><p>And here’s a screenshot of what happens when I tap <strong>Reset</strong>.</p><figure class='fixed'><img src="/images/swiftui-animation-2.gif"/></figure><p>Remember we set an implicit <code>.interactiveSpring()</code> animation on the clock hand hand, and we can see the <code>withAnimation(.default)</code> is ignored in favor of the spring animation. How can we <em>override</em> the spring animation instead?</p><p>The solution is <code>withTransaction</code>, which is similar to <code>withAnimation</code> except it takes a <code>Transaction</code> object. A <code>Transaction</code> is basically an <em>animation context</em>, if you’ve worked with those elsewhere.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
     @<span class="hljs-type">StateObject</span> <span class="hljs-keyword">var</span> timer: <span class="hljs-type">TimesUpTimer</span>
     
     <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
@@ -57,7 +57,7 @@
         }
     }
 }
-</code></pre><p>Here we create a Transaction with our desired animation (we’ll use a boring old <code>.default</code> animation). Then we set the Transaction’s <code>disablesAnimations</code> property to true, which tells it to disable all implicit animations on the affected views, e.g. our hand animation. Finally, we call <code>withTransaction(_:_:)</code> like we would <code>withAnimation(_:_:)</code>, providing our transaction and a closure to execute.</p><h2>Use <code>transaction(_:)</code> to override explicit animations</h2><p>Now something unexpected is happening: our <code>Text</code> view is animating when we tap <strong>Reset</strong>.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+</code></pre><p>Here we create a Transaction with a <code>.default</code> animation. Then we set the Transaction’s <code>disablesAnimations</code> property to true, which tells it to disable all implicit animations on the affected views, e.g. our hand animation. Finally, we call <code>withTransaction(_:_:)</code> like we would <code>withAnimation(_:_:)</code>, providing our transaction and a closure to execute.</p><figure class='fixed'><img src="/images/swiftui-animation-3.gif"/></figure><h2>Use <code>transaction(_:)</code> to override explicit animations</h2><p>Now something unexpected is happening: our <code>Text</code> view is animating when we tap <strong>Reset</strong>.</p><figure class='fixed'><img src="/images/swiftui-animation-4.gif"/></figure><p>Solution:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
     @<span class="hljs-type">StateObject</span> <span class="hljs-keyword">var</span> timer: <span class="hljs-type">TimesUpTimer</span>
     
     <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
@@ -68,7 +68,7 @@
     	...
     }
 }
-</code></pre><h2>Always test device rotation</h2><p>Your SwiftUI views will animate to their new sizes when you rotate your iPhone or iPad, and this may produce some undesirable results. I recommend testing device rotation in the simulator with <strong>Debug &rarr; Slow Animations</strong> enabled so you can see exactly what’s happening.</p><p>In my app, rotating the device seems to resize the timer face and hand differently. I’ll fix this by applying <code>drawingGroup()</code> to the <code>ZStack</code> that containing those views.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TimerClockfaceView</span>: <span class="hljs-title">View</span> </span>{
+</code></pre><figure class='fixed'><img src="/images/swiftui-animation-5.gif"/></figure><h2>Always test device rotation</h2><p>Your SwiftUI views will animate to their new sizes when you rotate your iPhone or iPad, and this may produce some undesirable results. I recommend testing device rotation in the simulator with <strong>Debug &rarr; Slow Animations</strong> enabled so you can see exactly what’s happening.</p><p>In my app, rotating the device seems to resize the timer face and hand differently. I’ll fix this by applying <code>drawingGroup()</code> to the <code>ZStack</code> that containing those views.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">TimerClockfaceView</span>: <span class="hljs-title">View</span> </span>{
     @<span class="hljs-type">State</span> <span class="hljs-keyword">var</span> angle: <span class="hljs-type">Angle</span>
     
     <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {

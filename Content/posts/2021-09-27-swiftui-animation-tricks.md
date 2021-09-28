@@ -54,7 +54,7 @@ struct TimerClockfaceView: View {
             
             makeHand()
                 .rotationEffect(angle)
-                .animation(reduceMotion ? .default : .interactiveSpring(),
+                .animation(reduceMotion ? .none : .interactiveSpring(),
                            value: angle)
         }
     }
@@ -87,6 +87,7 @@ struct ContentView: View {
 
 And here’s a screenshot of what happens when I tap **Reset**.
 
+<figure class='fixed'><img src="/images/swiftui-animation-2.gif"/></figure>
 
 Remember we set an implicit `.interactiveSpring()` animation on the clock hand hand, and we can see the `withAnimation(.default)` is ignored in favor of the spring animation. How can we *override* the spring animation instead?
 
@@ -109,12 +110,17 @@ struct ContentView: View {
 }
 ```
 
-Here we create a Transaction with our desired animation (we’ll use a boring old `.default` animation). Then we set the Transaction’s `disablesAnimations` property to true, which tells it to disable all implicit animations on the affected views, e.g. our hand animation. Finally, we call `withTransaction(_:_:)` like we would `withAnimation(_:_:)`, providing our transaction and a closure to execute.
+Here we create a Transaction with a `.default` animation. Then we set the Transaction’s `disablesAnimations` property to true, which tells it to disable all implicit animations on the affected views, e.g. our hand animation. Finally, we call `withTransaction(_:_:)` like we would `withAnimation(_:_:)`, providing our transaction and a closure to execute.
 
+<figure class='fixed'><img src="/images/swiftui-animation-3.gif"/></figure>
 
 ## Use `transaction(_:)` to override explicit animations
 
 Now something unexpected is happening: our `Text` view is animating when we tap **Reset**.
+
+<figure class='fixed'><img src="/images/swiftui-animation-4.gif"/></figure>
+
+Solution:
 
 ```swift
 struct ContentView: View {
@@ -130,6 +136,7 @@ struct ContentView: View {
 }
 ```
 
+<figure class='fixed'><img src="/images/swiftui-animation-5.gif"/></figure>
 
 ## Always test device rotation
 
