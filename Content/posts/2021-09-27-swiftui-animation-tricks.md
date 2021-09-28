@@ -16,7 +16,9 @@ I recently launched **[Time’s Up! Timer](https://overdesigned.net/timesup/)*
 
 Let’s start with the simplest lesson: always use `animation(_:value:)` for implicit animations. Unlike the simpler `.animation(_:)` modifier, this also requires an `Equatable` value parameter and the animation will *only* be applied when that value changes. Without this, the animation may run when other properties change or during animated transitions.
 
-Here’s an excerpt from the code for my timer view, which draws a clock face and a hand. The hand animates when its `angle` changes, thanks to `animation(.interactiveSpring(), value: angle)`.
+<figure class='fixed'><img src="/images/swiftui-animation-1.gif" alt="Animated GIF of a springy clock hand." /></figure>
+
+Here’s an excerpt from the code for my timer view, which draws a clock face and a hand. The hand moves with a bouncy spring animation when its `angle` changes, thanks to `animation(.interactiveSpring(), value: angle)`.
 
 ```swift
 struct TimerClockfaceView: View {
@@ -61,7 +63,7 @@ struct TimerClockfaceView: View {
 
 ## Use `withTransaction` to override implicit animations
 
-Here’s a snippet of code from my main view, which shows the timer, the remaining time as `Text`, and a **Reset** button.
+Here’s a snippet of code from my main view, which shows the timer, the remaining time as `Text`, and a **Reset** button with a nice slow `.default` animation.
 
 ```swift
 struct ContentView: View {
@@ -74,7 +76,9 @@ struct ContentView: View {
             TimerClockfaceView()
                 .aspectRatio(1, contentMode: .fit)
             Button("Reset") {
-                timer.reset()
+                withAnimation(.default) {
+                    timer.reset()
+                }
             }
         }
     }
@@ -84,28 +88,9 @@ struct ContentView: View {
 And here’s a screenshot of what happens when I tap **Reset**.
 
 
-Remember we set an implicit animation on our hand, so the rotation of the hand will animate using `.interactiveSpring()` when the **Reset** button is tapped. I think this is way too bouncy to use with **Reset**, so let’s override the implicit animation.
+Remember we set an implicit `.interactiveSpring()` animation on the clock hand hand, and we can see the `withAnimation(.default)` is ignored in favor of the spring animation. How can we *override* the spring animation instead?
 
-You might think using an explicit `withAnimation` is the answer…
-
-```swift
-struct ContentView: View {
-    @StateObject var timer: TimesUpTimer
-    
-    var body: some View {
-    	...
-        Button("Reset") {
-            withAnimation(.default) {
-                timer.reset()
-            }
-        }
-    }
-}
-```
-
-… but that doesn’t *override* the spring animation. The hand still bounces into place.
-
-The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` is basically an *animation context*, if you’ve worked with those elsewhere. 
+The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` is basically an *animation context*, if you’ve worked with those elsewhere.
 
 ```swift
 struct ContentView: View {
