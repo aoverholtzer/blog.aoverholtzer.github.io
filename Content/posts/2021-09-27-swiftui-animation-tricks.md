@@ -14,7 +14,7 @@ I recently launched **[Time’s Up! Timer](https://overdesigned.net/timesup/)*
 
 ## Use `animation(_:value:)` instead of `.animation(_:)`
 
-Let’s start with the simplest lesson: always use `animation(_:value:)` for implicit animations. Unlike the simpler `.animation(_:)` modifier, this also requires an `Equatable` value parameter and the animation will *only* be applied when that value changes. Without this, the animation may run when other properties change or during animated transitions.
+Let’s start with the simplest lesson: always use `animation(_:value:)` for implicit animations. Unlike the simpler `.animation(_:)` modifier, this also requires an `Equatable` value parameter and the animation will *only* be applied when that value changes. Without this, the animation may run when other properties change or during transitions.
 
 <figure class='fixed'><img src="/images/swiftui-animation-1.gif" alt="Animated GIF of a springy clock hand." /></figure>
 
@@ -39,9 +39,16 @@ struct TimerClockfaceView: View {
 The value-less version of `.animation(_:)` is deprecated as of iOS 15 / macOS 12, so I guess Apple agrees: always use `animation(_:value:)`.
 
 
+## Always test device rotation
+
+Speaking of unwanted animation: SwiftUI views will animate to their new sizes when you rotate your iPhone or iPad, and this may produce some undesirable results. I recommend testing device rotation in the simulator with **Debug &rarr; Slow Animations** enabled so you can see exactly what’s happening and fix it.
+
+
 ## Respect your user’s Reduce Motion setting
 
-Settings &rarr; Accessibility &rarr; Motion &rarr; Reduce Motion.
+iOS has a Reduce Motion accessibility setting, which disables or simplifies most animations: **Settings &rarr; Accessibility &rarr; Motion &rarr; Reduce Motion.** It’s important for third-party apps to respect this setting too, and with SwiftUI it’s incredibly easy.
+
+We first read the user’s preference using the `.accessibilityReduceMotion` environment value, then use a ternary operator in our `animation` modifier: 
 
 ```swift
 struct TimerClockfaceView: View {
@@ -63,7 +70,7 @@ struct TimerClockfaceView: View {
 
 ## Use `withTransaction` to override implicit animations
 
-Here’s a snippet of code from my main view, which shows the timer, the remaining time as `Text`, and a **Reset** button with a nice slow `.default` animation.
+Here’s a snippet of code from my main view, which shows the timer, the remaining time as `Text`, and a **Reset** button that will reset the timer with a nice slow `.default` animation.
 
 ```swift
 struct ContentView: View {
@@ -85,13 +92,13 @@ struct ContentView: View {
 }
 ```
 
-And here’s a screenshot of what happens when I tap **Reset**.
+And here’s a capture of what happens when I tap **Reset**.
 
 <figure class='fixed'><img src="/images/swiftui-animation-2.gif"/></figure>
 
-Remember we set an implicit `.interactiveSpring()` animation on the clock hand hand, and we can see the `withAnimation(.default)` is ignored in favor of the spring animation. How can we *override* the spring animation instead?
+It’t not working — the implicit spring animation on the clock hand hand is overriding the explicit `withAnimation` in our Reset function. How can we *override* the spring animation?
 
-The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` is basically an *animation context*, if you’ve worked with those elsewhere.
+The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` is basically an *animation context*, if you’ve worked with those in UIKit or elsewhere.
 
 ```swift
 struct ContentView: View {
@@ -110,17 +117,19 @@ struct ContentView: View {
 }
 ```
 
-Here we create a Transaction with a `.default` animation. Then we set the Transaction’s `disablesAnimations` property to true, which tells it to disable all implicit animations on the affected views, e.g. our hand animation. Finally, we call `withTransaction(_:_:)` like we would `withAnimation(_:_:)`, providing our transaction and a closure to execute.
+First we create a `Transaction` with a `.default` animation. Then we set the Transaction’s `disablesAnimations` property to true, which tells it to disable all implicit animations on the affected views, e.g. our hand animation. Finally, we call `withTransaction(_:_:)` like we would `withAnimation(_:_:)`, providing our transaction and a closure to execute.
 
 <figure class='fixed'><img src="/images/swiftui-animation-3.gif"/></figure>
 
+Looks good! (Actually `Animation.default` is pretty lame and I don’t actually use it in my app, but you get the idea!)
+
 ## Use `transaction(_:)` to override explicit animations
 
-Now something unexpected is happening: our `Text` view is animating when we tap **Reset**.
+Now if you look closely at that last animation, you may notice something you wouldn’t expect: when we tap **Reset**, the time `Text` view changes size and that change is animated.
 
 <figure class='fixed'><img src="/images/swiftui-animation-4.gif"/></figure>
 
-Solution:
+Yuck. Let’s disable that animation using `transaction(_:)`, which is a View Modifier that lets us change or replace the `Transaction` being applied to the view when we call `withAnimation` or `withTransaction`. In this case, we want no animation for the `Text` so we set `transaction.animation` to `.none`.
 
 ```swift
 struct ContentView: View {
@@ -136,30 +145,16 @@ struct ContentView: View {
 }
 ```
 
+Here’s the final result: the hand animates smoothly while the time snaps to its new value immediately.
+
 <figure class='fixed'><img src="/images/swiftui-animation-5.gif"/></figure>
 
-## Always test device rotation
+This is a very simple use of `transaction(_:)` but many things are possible: you could change the type of animation, change its duration, or even add a delay to it.
 
-Your SwiftUI views will animate to their new sizes when you rotate your iPhone or iPad, and this may produce some undesirable results. I recommend testing device rotation in the simulator with **Debug &rarr; Slow Animations** enabled so you can see exactly what’s happening.
+One word of warning from the [documentation](https://developer.apple.com/documentation/SwiftUI/Form/transaction(_:)):
 
-In my app, rotating the device seems to resize the timer face and hand differently. I’ll fix this by applying `drawingGroup()` to the `ZStack` that containing those views.
+> Use this modifier on leaf views such as Image or Button rather than container views such as VStack or HStack. The transformation applies to all child views within this view; calling transaction(_:) on a container view can lead to unbounded scope of execution depending on the depth of the view hierarchy.
 
-```swift
-struct TimerClockfaceView: View {
-    @State var angle: Angle
-    
-    var body: some View {
-        ZStack {
-            makeFace()
-            
-            makeHand()
-                .rotationEffect(angle)
-                .animation(.interactiveSpring(), value: angle)
-        }
-        .drawingGroup()
-    }
-}
-```
 
 ## For animation-heavy Mac apps, consider Catalyst
 
@@ -168,6 +163,14 @@ We shouldn’t need to use it, and there are some *serious* downsides — e.g., 
 
 ## Learn more
 
-I recommend SwiftUI Lab’s <strike>three</strike>*five* part series.
+For an in-depth look animation in SwiftUI, including `GeometryEffect` and the fancy new `TimelineView`, I highly recommend SwiftUI Lab’s <strike>three</strike>*five* part series:
 
-And if any of these tips have helped you, please check out **[Time’s Up! Timer](https://overdesigned.net/timesup/)** and leave a nice review!
+1. [Advanced SwiftUI Animations – Part 1: Paths](https://swiftui-lab.com/swiftui-animations-part1/)
+2. [Advanced SwiftUI Animations – Part 2: GeometryEffect](https://swiftui-lab.com/swiftui-animations-part2/)
+3. [Advanced SwiftUI Animations – Part 3: AnimatableModifier](https://swiftui-lab.com/swiftui-animations-part3/)
+4. [Advanced SwiftUI Animations — Part 4: TimelineView](https://swiftui-lab.com/swiftui-animations-part4/)
+5. [Advanced SwiftUI Animations – Part 5: Canvas](https://swiftui-lab.com/swiftui-animations-part5/)
+
+If these lessons have been helpful, please check out **[Time’s Up! Timer](https://overdesigned.net/timesup/)** and leave a nice review!
+
+And if you have further questions/comments/corrections, please reach out to [@aoverholtzer on Twitter](https://twitter.com/aoverholtzer). Thanks for reading!
