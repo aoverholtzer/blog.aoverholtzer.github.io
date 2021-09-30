@@ -1,7 +1,7 @@
 ---
 date: 2021-09-29 09:41
 description: Here are a few of the SwiftUI animation tips and tricks I’ve learned while building my kid-friendly timer app Time’s Up! Timer.
-image: /images/todo
+image: /images/times-up-promo-alt.jpg
 
 ---
 
@@ -46,7 +46,7 @@ Speaking of unwanted animation: SwiftUI views will animate to their new sizes wh
 
 ## Respect your user’s Reduce Motion setting
 
-iOS has a **Reduce Motion** accessibility setting, which disables or simplifies most animations. Try it yourself by going to **Settings &rarr; Accessibility &rarr; Motion &rarr; Reduce Motion.** It’s important for third-party apps to respect this setting too, and with SwiftUI it’s incredibly easy.
+iOS has a **Reduce Motion** accessibility setting, which disables or simplifies most animations. Try it yourself by going to **Settings &rarr; Accessibility &rarr; Motion &rarr; Reduce Motion.** Third-party apps like ours should respect this setting too, and with SwiftUI it’s incredibly easy.
 
 ```swift
 struct TimerClockfaceView: View {
@@ -66,12 +66,12 @@ struct TimerClockfaceView: View {
 }
 ```
 
-We first read the user’s preference using the `\.accessibilityReduceMotion` environment value, then use a ternary operator in `animation(_:value:)` to decide whether to animate the hand or not.
+We first read the user’s preference using the `\.accessibilityReduceMotion` environment value, then use a ternary operator in `animation(_:value:)` to set the animation to `.none` if `reduceMotion` is true.
 
 
 ## Use `withTransaction` to override implicit animations
 
-Here’s a snippet of code from my main view, which shows the timer, the remaining time as `Text`, and a **Reset** button that will reset the timer with a nice slow `.default` animation.
+Here’s a snippet of code from my main view, which shows the timer, the remaining time as `Text`, and a **Reset** button that will reset the timer with a nice (slow) `.default` animation.
 
 ```swift
 struct ContentView: View {
@@ -99,7 +99,7 @@ And here’s a capture of what happens when I tap **Reset**.
 
 It’s not working as expected — the implicit spring animation on the clock hand hand is overriding the explicit `withAnimation` in our Reset function. How can we *override* the spring animation?
 
-The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` is basically an *animation context*, if you’ve worked with those in UIKit or elsewhere.
+The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` represents both an `Animation` and its *context*, giving you more control over how the animation is applied.
 
 ```swift
 struct ContentView: View {
@@ -132,7 +132,7 @@ Now if you look closely at that last animation, you may notice something else th
 
 <figure class='fixed'><img src="/images/swiftui-animation-4.gif"/></figure>
 
-Yuck. Let’s disable that animation using `transaction(_:)`, which is a View Modifier that lets us change or replace the `Transaction` being applied to the view when we call `withAnimation` or `withTransaction`. In this case, we want no animation for the `Text` so we set `transaction.animation` to `.none`.
+Yuck. Let’s disable that animation using `transaction(_:)`, which is a View Modifier that lets us change or replace the `Transaction` being applied to the view when we called `withAnimation` or `withTransaction`. In this case, we want no animation for the `Text` so we set `transaction.animation` to `.none`.
 
 ```swift
 struct ContentView: View {
@@ -152,11 +152,11 @@ Here’s the final result: the hand animates smoothly while the time snaps to it
 
 <figure class='fixed'><img src="/images/swiftui-animation-5.gif"/></figure>
 
-This is a very simple use of `transaction(_:)` but many things are possible: you could change the type of animation, add a delay, or change its duration.
+This is a very simple use of `transaction(_:)` but many things are possible: you could change the type of animation, add a delay, or change its duration. It’s rad.
 
-One word of warning from the [documentation](https://developer.apple.com/documentation/SwiftUI/Form/transaction(_:)):
+One word of warning from the [documentation](https://developer.apple.com/documentation/SwiftUI/Form/transaction%28_:%29):
 
-> Use this modifier on leaf views such as Image or Button rather than container views such as VStack or HStack. The transformation applies to all child views within this view; calling transaction(_:) on a container view can lead to unbounded scope of execution depending on the depth of the view hierarchy.
+> Use this modifier on leaf views such as `Image` or `Button` rather than container views such as `VStack` or `HStack`. The transformation applies to all child views within this view; calling `transaction(_:)` on a container view can lead to unbounded scope of execution depending on the depth of the view hierarchy.
 
 
 ## For animation-heavy Mac apps, consider Catalyst
@@ -167,7 +167,7 @@ For tvOS, testing on real hardware is key because Apple TV boxes are relatively 
 
 The Mac app was a bigger issue, in a way I didn’t expect: SwiftUI animations run very poorly on macOS 11 (I have not done performance testing on macOS 12). My eventual solution was to abandon my “native” macOS app and switch to a Catalyst app, where animations run great! 🤷🏻‍♂️
 
-So my advice for animation-heavy SwiftUI Mac apps is to consider Catalyst. This may not be a good trade-off for many apps — you can’t use `.toolbar` to make Mac toolbars, you have no access to `.commands` to make menus or `Settings` to make a Preferences window — but for whatever reason, SwiftUI animations run much, *much* better in Catalyst apps.
+So my advice for animation-heavy SwiftUI Mac apps is to consider Catalyst. This may not be a good trade-off for many apps — you can’t use `.toolbar` to make Mac toolbars, and you have no access to macOS-only APIs like `.commands` or `Settings` — but for whatever reason, SwiftUI animations run much, *much* better in Catalyst apps.
 
 
 ## Learn more
