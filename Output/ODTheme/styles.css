@@ -20,6 +20,7 @@ html {
 
 body {
     font-family: myriad-pro-1, myriad-pro-2, sans-serif;
+    font-variant-numeric: proportional-nums;
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;

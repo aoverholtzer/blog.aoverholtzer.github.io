@@ -152,7 +152,7 @@ Here’s the final result: the hand animates smoothly while the time snaps to it
 
 <figure class='fixed'><img src="/images/swiftui-animation-5.gif"/></figure>
 
-This is a very simple use of `transaction(_:)` but many things are possible: you could change the type of animation, add a delay, or change its duration. It’s rad.
+This is a very simple use of `transaction(_:)` but many things are possible: you could change to a different animation, add a delay, or change the current animation’s duration. It’s pretty cool.
 
 One word of warning from the [documentation](https://developer.apple.com/documentation/SwiftUI/Form/transaction%28_:%29):
 
@@ -161,13 +161,13 @@ One word of warning from the [documentation](https://developer.apple.com/documen
 
 ## For animation-heavy Mac apps, consider Catalyst
 
-**[Time’s Up! Timer](https://overdesigned.net/timesup/)** is available for iOS, macOS, and tvOS, which required some platform-specific optimizations.
+[Time’s Up! Timer](https://overdesigned.net/timesup/) is available for iOS, macOS, and tvOS, which required some platform-specific optimizations.
 
 For tvOS, testing on real hardware is key because Apple TV boxes are relatively underpowered. I simplified a few views and animations to compensate.
 
-The Mac app was a bigger issue, in a way I didn’t expect: SwiftUI animations run very poorly on macOS 11 (I have not done performance testing on macOS 12). My eventual solution was to abandon my “native” macOS app and switch to a Catalyst app, where animations run great! 🤷🏻‍♂️
+The Mac app more of a problem, in a way I didn’t expect: **SwiftUI animations run very poorly on macOS 11** (I have not done performance testing on macOS 12). My eventual solution was to abandon my “native” macOS app and switch to a Catalyst app, where animations run great! 🤷🏻‍♂️
 
-So my advice for animation-heavy SwiftUI Mac apps is to consider Catalyst. This may not be a good trade-off for many apps — you can’t use `.toolbar` to make Mac toolbars, and you have no access to macOS-only APIs like `.commands` or `Settings` — but for whatever reason, SwiftUI animations run much, *much* better in Catalyst apps.
+So my advice for animation-heavy SwiftUI Mac apps is to consider Catalyst. Catalyst may not be a good trade-off for many apps — you can’t use `.toolbar` to make Mac toolbars, and you have no access to macOS-only APIs like `.commands` or `Settings` — but for whatever reason, SwiftUI animations run much, *much* better in Catalyst apps.
 
 
 ## Learn more

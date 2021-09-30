@@ -8,7 +8,7 @@ image: /images/status-menu-example-wide.jpg
 
 <figure><img src="/images/cheatsheet-menu.jpg" srcset="/images/cheatsheet-menu.jpg 2x" alt="Screenshot of Cheatsheet’s status menu" /></figure>
 
-I make a somewhat successful app called [Cheatsheet](https://itunes.apple.com/app/id1468213484), which is available for iOS, watchOS, and — thanks to Catalyst — macOS. Cheatsheet makes it easy to get to your notes from anywhere, which means widgets and custom keyboards on iOS and complications on watchOS. On macOS, Cheatsheet has a *status menu app*. 
+I make a somewhat successful app called **[Cheatsheet](https://itunes.apple.com/app/id1468213484)**, which is available for iOS, watchOS, and — thanks to Catalyst — macOS. Cheatsheet makes it easy to get to your notes from anywhere, which means widgets and custom keyboards on iOS and complications on watchOS. On macOS, Cheatsheet has a *status menu app*. 
 
 Look up at the righthand side of a Mac’s menu bar and you’ll see a row of icons called **status menus**. Several status menus are provided by macOS, such as the Wi-Fi and Volume controls. Third-party apps can also create status menus to provide easy, always-available access to app features.
 
