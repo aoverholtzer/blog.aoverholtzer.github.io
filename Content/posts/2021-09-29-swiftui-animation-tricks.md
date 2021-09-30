@@ -1,6 +1,6 @@
 ---
 date: 2021-09-29 09:41
-description: Here are a few of the SwiftUI animation tips and tricks I’ve learned while building my kid-friendly timer app Time’s Up! Timer.
+description: Here are a few of the SwiftUI animation tips and tricks I’ve learned building my kid-friendly timer app Time’s Up! Timer.
 image: /images/times-up-promo-alt.jpg
 
 ---
