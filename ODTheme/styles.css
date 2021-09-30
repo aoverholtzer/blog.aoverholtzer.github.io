@@ -20,6 +20,7 @@ html {
 
 body {
     font-family: myriad-pro-1, myriad-pro-2, sans-serif;
+    font-variant-numeric: proportional-nums;
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
@@ -85,17 +86,20 @@ nav li a.selected {
 }
 
 h1 {
-    margin-bottom: 20px;
+    margin-bottom: 0.5em;
     font-size: 2em;
     line-height: 1.25
 }
+figure + h1 {
+    margin-top: 1em;
+}
 
 h2 {
-    margin: 30px 0 10px;
+    margin: 2em 0 0.5em;
     line-height: 1.25
 }
 h1 + h2 {
-    margin-top: 0;
+    margin-top: 0.5em;
 }
 
 p, li {
@@ -271,4 +275,9 @@ figure > img {
     padding: 0;
     border: none;
     border-radius: 4px;
+}
+figure.fixed {
+    margin-left: auto;
+    margin-right: auto;
+    width: 240px;
 }
