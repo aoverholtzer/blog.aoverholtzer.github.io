@@ -99,7 +99,7 @@ And here’s a capture of what happens when I tap **Reset**.
 
 It’s not working as expected — the implicit spring animation on the clock hand hand is overriding the explicit `withAnimation` in our Reset function. How can we *override* the spring animation?
 
-The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` represents both an `Animation` and its *context*, giving you more control over how the animation is applied.
+The solution is `withTransaction`, which is similar to `withAnimation` except it takes a `Transaction` object. A `Transaction` represents the *context* of the current state-processing update, including the animation that will be applied.
 
 ```swift
 struct ContentView: View {
@@ -180,6 +180,8 @@ For an amazing, in-depth look at animation in SwiftUI, including `GeometryEffect
 4. [Advanced SwiftUI Animations — Part 4: TimelineView](https://swiftui-lab.com/swiftui-animations-part4/)
 5. [Advanced SwiftUI Animations – Part 5: Canvas](https://swiftui-lab.com/swiftui-animations-part5/)
 
-If my tips have been helpful, please check out **[Time’s Up! Timer](https://overdesigned.net/timesup/)** and maybe leave a nice review! 😇
+Wondering how I made the “shake” animation that’s used when a timer ends? Check out [SwiftUI: Shake Animation](https://www.objc.io/blog/2019/10/01/swiftui-shake-animation/) by objc.io. 
 
-And if you have any questions/comments/corrections, please reach out to [@aoverholtzer on Twitter](https://twitter.com/aoverholtzer). Thanks for reading!
+Learn more about [Transactions in SwiftUI](https://swiftwithmajid.com/2020/10/07/transactions-in-swiftui/) from Swift with Majid.
+
+If my tips have been helpful, please check out **[Time’s Up! Timer](https://overdesigned.net/timesup/)**. And if you have any questions/comments/corrections, feel free to reach out to [@aoverholtzer on Twitter](https://twitter.com/aoverholtzer). Thanks for reading!
