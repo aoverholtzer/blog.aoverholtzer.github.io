@@ -165,7 +165,7 @@ One word of warning from the [documentation](https://developer.apple.com/documen
 
 For tvOS, testing on real hardware is key because Apple TV boxes are relatively underpowered. I simplified a few views and animations to compensate.
 
-The Mac app more of a problem, in a way I didn’t expect: **SwiftUI animations run very poorly on macOS 11** (I have not done performance testing on macOS 12). My eventual solution was to abandon my “native” macOS app and switch to a Catalyst app, where animations run great! 🤷🏻‍♂️
+The Mac app was more of a problem, in a way I didn’t expect: **SwiftUI animations run very poorly on macOS 11** (I have not done performance testing on macOS 12). I tried using `drawingGroup()` everywhere I could, but that wasn’t enough. My eventual solution was to abandon my “native” macOS app and switch to a Catalyst app, where animations run great! 🤷🏻‍♂️
 
 So my advice for animation-heavy SwiftUI Mac apps is to consider Catalyst. Catalyst may not be a good trade-off for many apps — you can’t use `.toolbar` to make Mac toolbars, and you have no access to macOS-only APIs like `.commands` or `Settings` — but for whatever reason, SwiftUI animations run much, *much* better in Catalyst apps.
 
@@ -180,8 +180,8 @@ For an amazing, in-depth look at animation in SwiftUI, including `GeometryEffect
 4. [Advanced SwiftUI Animations — Part 4: TimelineView](https://swiftui-lab.com/swiftui-animations-part4/)
 5. [Advanced SwiftUI Animations – Part 5: Canvas](https://swiftui-lab.com/swiftui-animations-part5/)
 
-Wondering how I made the “shake” animation that’s used when a timer ends? Check out [SwiftUI: Shake Animation](https://www.objc.io/blog/2019/10/01/swiftui-shake-animation/) by objc.io. 
+Wondering how I made the “shake” animation that’s used when a timer ends? Check out [SwiftUI: Shake Animation](https://www.objc.io/blog/2019/10/01/swiftui-shake-animation/) from the objc.io blog. 
 
-Learn more about [Transactions in SwiftUI](https://swiftwithmajid.com/2020/10/07/transactions-in-swiftui/) from Swift with Majid.
+Still confused by `Transaction`? Check out [Transactions in SwiftUI](https://swiftwithmajid.com/2020/10/07/transactions-in-swiftui/) by Majid Jabrayilov.
 
-If my tips have been helpful, please check out **[Time’s Up! Timer](https://overdesigned.net/timesup/)**. And if you have any questions/comments/corrections, feel free to reach out to [@aoverholtzer on Twitter](https://twitter.com/aoverholtzer). Thanks for reading!
+If you have any questions/comments/corrections, feel free to reach out to [@aoverholtzer on Twitter](https://twitter.com/aoverholtzer). And if this article has been helpful, please check out **[Time’s Up! Timer](https://overdesigned.net/timesup/)**. Thanks for reading!
