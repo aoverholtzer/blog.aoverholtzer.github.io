@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="og:site_name" content="overdesigned blog"/><link rel="canonical" href="https://blog.overdesigned.net/posts/2024-02-29-visionos-window-basics"/><meta name="twitter:url" content="https://blog.overdesigned.net/posts/2024-02-29-visionos-window-basics"/><meta name="og:url" content="https://blog.overdesigned.net/posts/2024-02-29-visionos-window-basics"/><title>Breaking the Glass Window in visionOS | overdesigned blog</title><meta name="twitter:title" content="Breaking the Glass Window in visionOS | overdesigned blog"/><meta name="og:title" content="Breaking the Glass Window in visionOS | overdesigned blog"/><meta name="description" content="Here are a few tips and tricks for working with windows and glass in visionOS."/><meta name="twitter:description" content="Here are a few tips and tricks for working with windows and glass in visionOS."/><meta name="og:description" content="Here are a few tips and tricks for working with windows and glass in visionOS."/><meta name="twitter:card" content="summary_large_image"/><link rel="stylesheet" href="/styles.css" type="text/css"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="shortcut icon" href="/images/favicon.png" type="image/png"/><link rel="alternate" href="/feed.rss" type="application/rss+xml" title="Subscribe to overdesigned blog"/><meta name="twitter:image" content="https://blog.overdesigned.net/images/clocks-vision-promo.jpg"/><meta name="og:image" content="https://blog.overdesigned.net/images/clocks-vision-promo.jpg"/></head><body class="item-page"><header><div class="wrapper"><a href="/"><b>over</b>designed blog</a><p class="secondary">by <a href="https://twitter.com/aoverholtzer">Adam Overholtzer</a></p></div></header><div class="wrapper"><article><div class="content"><figure><img src="/images/clocks-vision-promo.jpg" alt="Screenshot of my Clocks app on Apple Vision Pro" /></figure><h1>Breaking the Glass Window in visionOS</h1><p>Developing for visionOS, it may seem like your app is stuck in a flat pane of glass. But with the right SwiftUI modifiers — and a few sneaky calls to UIKit — we can achieve some neat effects! Read on to learn few of the windowing tricks I learned making <strong><a href="https://overdesigned.net/clocks/">Clocks</a></strong> for Apple Vision Pro.</p><h2>Make a transparent window</h2><p>Let’s start with the thing we all want to do at one point or another: <strong>remove the glass background from our window</strong>. Like many things with SwiftUI, this is quite easy once you find the right modifier: just set <code>.windowStyle(.plain)</code> on your <code>WindowGroup</code>.</p><pre data-language="swift"><code>@main
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">MyApp</span>: <span class="hljs-title">App</span> </span>{
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">Scene</span> {
+        <span class="hljs-type">WindowGroup</span> {
+            <span class="hljs-type">ContentView</span>()
+        }
+        .windowStyle(.plain)
+    }
+}
+</code></pre><p>And voilà, a transparent window!</p><figure><img src="/images/visionos-window-basics1.jpg" alt="Screenshot of a window with transparent background on visionOS." /></figure><p>Of course, this window may be quite hard for our users to move or resize (or even see!), so we should also learn how to…</p><h2>Add a glass background to a view</h2><p>Again, adding a glass background is easy if you know the right incancation: <code>.glassBackgroundEffect()</code>. Those of you familiar with SwiftUI's <code>Material</code> backgrounds might have thought that was the answer, but no — the visionOS glass background is <em>special</em> and needs its own <em>special modifier</em>.</p><p>Anyway, let's look at this modifier:</p><pre data-language="swift"><code><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">glassBackgroundEffect</span>&lt;S&gt;<span class="hljs-params">(
+    <span class="hljs-keyword">in</span> shape: S,
+    displayMode: GlassBackgroundDisplayMode = .always
+)</span></span> -&gt; some <span class="hljs-type">View</span> <span class="hljs-keyword">where</span> <span class="hljs-type">S</span> : <span class="hljs-type">InsettableShape</span>
+</code></pre><p>It has two options: shape and display mode. Display mode controls the visibility of the glass background and you can pass one of <code>.always</code>, <code>.never</code>, or <code>.implicit</code>.</p><p>The <code>shape</code> parameter is more interesting: it <em>appears</em> to accept any <code>InsettableShape</code>, but in practice only a few work: <code>RoundedRectangle</code>, <code>Capsule</code>, and <code>Circle</code>. Any other shape will appear as a simple rectangle and will lack the fancy specular highlights around the edges. As the <a href="https://developer.apple.com/documentation/swiftui/view/glassbackgroundeffect(in:displaymode:">documentation</a>) says:</p><blockquote><p>Prefer a shape for the background that has rounded corners. An unsupported shape style resolves to a rectangle.</p></blockquote><p>Here is some sample code and a screenshot of how it looks:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ContentView</span>: <span class="hljs-title">View</span> </span>{
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        <span class="hljs-type">VStack</span> {
+            
+            <span class="hljs-type">Text</span>(<span class="hljs-string">"Capsule"</span>)
+                .padding()
+                .glassBackgroundEffect(<span class="hljs-keyword">in</span>: .capsule)
+            
+            <span class="hljs-type">Text</span>(<span class="hljs-string">"Circle"</span>)
+                .padding(<span class="hljs-number">50</span>)
+                .glassBackgroundEffect(<span class="hljs-keyword">in</span>: .circle)
+            
+            <span class="hljs-type">Text</span>(<span class="hljs-string">"Round Rect"</span>)
+                .padding()
+                .glassBackgroundEffect(<span class="hljs-keyword">in</span>: .rect(cornerRadius: <span class="hljs-number">11</span>))
+            
+            <span class="hljs-type">Text</span>(<span class="hljs-string">"Rectangle"</span>)
+                .padding()
+                .glassBackgroundEffect(<span class="hljs-keyword">in</span>: .rect)
+        }
+        .font(.extraLargeTitle)
+    }
+}
+</code></pre><figure style="margin-bottom: 2em;"><img src="/images/visionos-window-basics2.jpg" alt="Screenshot of a visionOS window with transparent background and four small subviews with glass backgrounds: Capsule, Circle, Round Rect, and Rectangle." /></figure><h3>3D glass(es)</h3><p>Now that we have a transparent window and know how to create multiple glass-backed views inside of it, we can play around with some fun 3D effects and layouts.</p><p>Use <code>.offset(z:)</code> to stack and overlay your views in three dimensions. Try playing around with <code>.rotation3DEffect(_:axis:anchor:)</code> to tilt and turn your views in 3D.</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">PanelView</span>: <span class="hljs-title">View</span> </span>{
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        <span class="hljs-type">HStack</span>(spacing: <span class="hljs-number">20</span>) {
+            
+            <span class="hljs-type">ZStack</span>(alignment: .topLeading) {
+                <span class="hljs-type">ListView</span>()
+                    .glassBackgroundEffect()
+                
+                <span class="hljs-type">Button</span>(<span class="hljs-string">"Close"</span>, systemImage: <span class="hljs-string">"xmark"</span>, action: { })
+                    .labelStyle(.iconOnly)
+                    .glassBackgroundEffect(<span class="hljs-keyword">in</span>: .circle)
+                    .offset(x: -<span class="hljs-number">20</span>, y: -<span class="hljs-number">10</span>)
+                    .offset(z: <span class="hljs-number">10</span>)
+            }
+            .rotation3DEffect(.degrees(<span class="hljs-number">40</span>),
+                              axis: .y,
+                              anchor: .trailing)
+            
+            <span class="hljs-type">MainView</span>()
+                .glassBackgroundEffect()
+            
+            <span class="hljs-type">VStack</span>(spacing: -<span class="hljs-number">20</span>) {
+                <span class="hljs-type">DetailView</span>()
+                    .glassBackgroundEffect()
+                <span class="hljs-type">DetailView</span>(style: .light)
+                    .glassBackgroundEffect()
+                    .offset(z: <span class="hljs-number">45</span>)
+                <span class="hljs-type">DetailView</span>(style: .dark)
+                    .glassBackgroundEffect()
+                    .offset(z: <span class="hljs-number">90</span>)
+            }
+            .rotation3DEffect(.degrees(-<span class="hljs-number">30</span>),
+                              axis: .y,
+                              anchor: .leading)
+        }
+    }
+}
+</code></pre><figure><img src="/images/visionos-window-basics3.jpg" alt="Screenshot of a visionOS window with multiple panels arranged in 3D." /></figure><p>If you want to get really fancy, try combining these modifiers with animation to produce interactions like this flippy one from my <a href="https://overdesigned.net/clocks/">Clocks</a> app:</p><figure><iframe id="ytplayer" type="text/html" width="400" height="225" src="https://www.youtube.com/embed/3L0s9NX9UsA?autoplay=1&loop=1&controls=0&playsinline&playlist=3L0s9NX9UsA&rel=0" frameborder="0" alt="Video of a visionOS window flipping in 3D."></iframe></figure><h2>Set a window’s default and minimum size</h2><p>Setting a window's minimum size is straightforward: use <code>.frame(minWidth:minHeight:)</code> on your view. This also works for <code>maxWidth</code> and <code>maxHeight</code> if you want to specify a maximum size for a window.</p><p>Now you might think <code>.frame(idealWidth:idealHeight:)</code> would set a window's default size, but they do nothing. Instead, we must use the new modifier <code>.defaultSize(width:height:)</code> on our <code>WindowGroup</code>.</p><p>If that's a little confusing, here's a full example:</p><pre data-language="swift"><code><span class="hljs-type">WindowGroup</span> {
+    <span class="hljs-type">PanelView</span>()
+        .frame(minWidth: <span class="hljs-number">540</span>, minHeight: <span class="hljs-number">320</span>)
+}
+.windowStyle(.plain)
+.defaultSize(width: <span class="hljs-number">800</span>, height: <span class="hljs-number">600</span>)
+</code></pre><h2>Resize a window</h2><p>Programmatically resizing a window — at least as-of visionOS 1.1 — can only be done with UIKit. Specifically, you need to have the window's <code>UIWindowScene</code> and then you can call <code>requestGeometryUpdate</code> with a new size like so:</p><pre data-language="swift"><code><span class="hljs-keyword">let</span> size = <span class="hljs-type">CGSize</span>(width: <span class="hljs-number">1440</span>, height: <span class="hljs-number">900</span>)
+windowScene.requestGeometryUpdate(.<span class="hljs-type">Vision</span>(size: size))
+</code></pre><p>There are a few ways to get the current <code>UIWindowScene</code> in SwiftUI, but the most common — looping through <code>UIApplication.shared.connectedScenes</code> to find the key window — is risky on visionOS because window foregrounding and focus don't work like they do on other platforms.</p><p>Instead, I'll link to two solutions:</p><ol><li>Create <code>AppDelegate</code> and <code>SceneDelegate</code> classes and use them to capture a reference to your <code>UIWindow</code>, as explained in this excellent <a href="https://stackoverflow.com/a/60359809">Stack Overflow answer</a> by Asperi.</li><li>Create a <code>UIViewRepresentable</code> that captures its parent <code>UIWindow</code> and passes it up the view hierarchy using a <code>PreferenceKey</code>. I'm using the <strong><a href="https://github.com/divadretlaw/WindowSceneReader">WindowSceneReader</a></strong> library by David Walter, which elegantly handles all this messiness for me.</li></ol><h2>Hide the standard window controls</h2><p>Just add <code>.persistentSystemOverlays(.hidden)</code> to a view to hide the standard window controls, i.e., the close button and drag bar. They'll appear briefly when the window opens before disappearing; the controls reappear if the user “taps” on the window, or you can control this programatically with a ternary operator, e.g.:</p><pre data-language="swift"><code><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ControlHidingView</span>&lt;<span class="hljs-title">Content</span>: <span class="hljs-title">View</span>&gt;: <span class="hljs-title">View</span> </span>{
+    @<span class="hljs-type">ViewBuilder</span> <span class="hljs-keyword">var</span> content: ()-&gt;<span class="hljs-type">Content</span>
+    @<span class="hljs-type">State</span> <span class="hljs-keyword">var</span> hideControls = <span class="hljs-literal">true</span>
+    
+    <span class="hljs-keyword">var</span> body: some <span class="hljs-type">View</span> {
+        content()
+            .onTapGesture {
+                hideControls.toggle()
+            }
+            .persistentSystemOverlays(hideControls ? .hidden : .visible)
+    }
+}
+</code></pre><p>--</p><p>That's it for now! If you have any questions/comments/corrections, feel free to reach out to <a href="https://iosdev.space/@adam">@adam@iosdev.space on Mastodon</a> or <a href="https://twitter.com/aoverholtzer">@aoverholtzer on Twitter</a>. And if this article has been helpful, please check out <a href="https://overdesigned.net/">my apps</a>. Thanks for reading!</p></div><p class="secondary">Posted by Adam Overholtzer on February 29, 2024</p></article></div><footer><p>&copy; 2024 C. Adam Overholtzer &bull; <a href="https://overdesigned.net">Home</a> &bull; <a href="/">Blog</a> &bull; <a href="/feed.rss">RSS</a> &bull; <a href="https://twitter.com/aoverholtzer">Contact</a></p></footer></body></html>

@@ -231,7 +231,7 @@ private extension Node where Context == HTML.BodyContext {
     static func footer<T: Website>(for site: T) -> Node {
         return .footer(
             .p(
-                .text("&copy; 2020 C. Adam Overholtzer"),
+                .text("&copy; 2024 C. Adam Overholtzer"),
                 .text(" &bull; "),
                 .a(
                     .text("Home"),
