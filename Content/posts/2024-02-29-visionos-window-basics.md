@@ -7,9 +7,9 @@ image: /images/clocks-vision-promo.jpg
 
 <figure><img src="/images/clocks-vision-promo.jpg" alt="Screenshot of my Clocks app on Apple Vision Pro" /></figure>
 
-# Breaking the Glass Window in visionOS
+# Shattered Glass: Customizing Windows in visionOS
 
-Developing for visionOS, it may seem like your app is stuck in a flat pane of glass. But with the right SwiftUI modifiers — and a few sneaky calls to UIKit — we can achieve some neat effects! Read on to learn few of the windowing tricks I learned making **[Clocks](https://overdesigned.net/clocks/)** for Apple Vision Pro.
+Developing for visionOS, it may seem like your app is stuck in a flat pane of glass. But with the right SwiftUI modifiers — and maybe a sneaky call to UIKit — we can achieve some neat effects! Read on to learn few of the windowing tricks I learned making **[Clocks](https://overdesigned.net/clocks/)** for Apple Vision Pro.
 
 ## Make a transparent window
 
@@ -34,9 +34,9 @@ And voilà, a transparent window!
 Of course, this window may be quite hard for our users to move or resize (or even see!), so we should also learn how to…
 
 
-## Add a glass background to a view
+## Add glass background to a view
 
-Again, adding a glass background is easy if you know the right incancation: `.glassBackgroundEffect()`. Those of you familiar with SwiftUI's `Material` backgrounds might have thought that was the answer, but no — the visionOS glass background is *special* and needs its own *special modifier*.
+Again, adding a glass background is easy if you know the right incancation: `.glassBackgroundEffect()`. Those of you familiar with SwiftUI's `Material` backgrounds might have thought that was the answer, but no, visionOS is much to fancy for that.
 
 Anyway, let's look at this modifier:
 
@@ -49,11 +49,11 @@ func glassBackgroundEffect<S>(
 
 It has two options: shape and display mode. Display mode controls the visibility of the glass background and you can pass one of `.always`, `.never`, or `.implicit`. 
 
-The `shape` parameter is more interesting: it *appears* to accept any `InsettableShape`, but in practice only a few work: `RoundedRectangle`, `Capsule`, and `Circle`. Any other shape will appear as a simple rectangle and will lack the fancy specular highlights around the edges. As the [documentation](https://developer.apple.com/documentation/swiftui/view/glassbackgroundeffect(in:displaymode:)) says:
+The `shape` parameter is more interesting: it *appears* to accept any `InsettableShape`, but in practice only a few work: `RoundedRectangle`, `Capsule`, and `Circle`. Any other shape will appear as a simple rectangle and will lack specular highlights around the edges. As the [documentation](https://developer.apple.com/documentation/swiftui/view/glassbackgroundeffect(in:displaymode:)) says:
 
 > Prefer a shape for the background that has rounded corners. An unsupported shape style resolves to a rectangle.
 
-Here is some sample code and a screenshot of how it looks:
+Here is some sample code and a screenshot of how the different shapes look:
 
 ```swift
 struct ContentView: View {
@@ -81,14 +81,20 @@ struct ContentView: View {
 }
 ```
 
-<figure style="margin-bottom: 2em;"><img src="/images/visionos-window-basics2.jpg" alt="Screenshot of a visionOS window with transparent background and four small subviews with glass backgrounds: Capsule, Circle, Round Rect, and Rectangle." /></figure>
+<figure style="margin-bottom: 1em;"><img src="/images/visionos-window-basics2.jpg" alt="Screenshot of a visionOS window with transparent background and four small subviews with glass backgrounds: Capsule, Circle, Round Rect, and Rectangle." /></figure>
+
+<figure class="fixed" style="width:300px;"><img src="/images/visionos-window-basics2b.jpg" alt="Screenshot of a visionOS window with transparent background and four small subviews with glass backgrounds: Capsule, Circle, Round Rect, and Rectangle." /></figure>
+
+Notice the lack of specular highlights — the light-catching edges of the glass panes — on the sharp-cornered rectangle.
 
 
-### 3D glass(es)
+### Into the third dimension!
 
 Now that we have a transparent window and know how to create multiple glass-backed views inside of it, we can play around with some fun 3D effects and layouts.
 
-Use `.offset(z:)` to stack and overlay your views in three dimensions. Try playing around with `.rotation3DEffect(_:axis:anchor:)` to tilt and turn your views in 3D.
+Use `.offset(z:)` to stack and overlay your views in three dimensions. Or try playing around with `.rotation3DEffect(_:axis:anchor:)` to tilt and turn your views in 3D.
+
+<figure><img src="/images/visionos-window-basics3.jpg" alt="Screenshot of a visionOS window with multiple panels arranged in 3D." /></figure>
 
 ```swift
 struct PanelView: View {
@@ -130,9 +136,7 @@ struct PanelView: View {
 }
 ```
 
-<figure><img src="/images/visionos-window-basics3.jpg" alt="Screenshot of a visionOS window with multiple panels arranged in 3D." /></figure>
-
-If you want to get really fancy, try combining these modifiers with animation to produce interactions like this flippy one from my [Clocks](https://overdesigned.net/clocks/) app:
+If you want to get really fancy, try combining these modifiers with animation and interactivity, like this flippy interaction from my [Clocks](https://overdesigned.net/clocks/) app:
 
 <figure><iframe id="ytplayer" type="text/html" width="400" height="225" src="https://www.youtube.com/embed/3L0s9NX9UsA?autoplay=1&loop=1&controls=0&playsinline&playlist=3L0s9NX9UsA&rel=0" frameborder="0" alt="Video of a visionOS window flipping in 3D."></iframe></figure>
 
@@ -141,9 +145,9 @@ If you want to get really fancy, try combining these modifiers with animation to
 
 Setting a window's minimum size is straightforward: use `.frame(minWidth:minHeight:)` on your view. This also works for `maxWidth` and `maxHeight` if you want to specify a maximum size for a window.
 
-Now you might think `.frame(idealWidth:idealHeight:)` would set a window's default size, but these parameters seem to do nothing. Instead, we must use the new modifier `.defaultSize(width:height:)` on our `WindowGroup`.
+Now you might think `.frame(idealWidth:idealHeight:)` would set a window's default size, but these parameters don't seem to do anything. Instead, use the new(ish) modifier `.defaultSize(width:height:)` on your `WindowGroup`.
 
-If that's a little confusing, here's a full example:
+If that's a little unclear, here's a full example:
 
 ```swift
 WindowGroup {
@@ -156,7 +160,7 @@ WindowGroup {
 
 ## Resize a window
 
-Programmatically resizing a window — at least as-of visionOS 1.1 — can only be done with UIKit. Specifically, you need to have the window's `UIWindowScene` and then you can call `requestGeometryUpdate` with a new size like so:
+Programmatically resizing a window — at least as-of visionOS 1.1 — can only be done with UIKit. Specifically, you need to have your window's `UIWindowScene` so you can call `requestGeometryUpdate` with a new size like so:
 
 ```swift
 let size = CGSize(width: 1440, height: 900)
@@ -165,10 +169,10 @@ windowScene.requestGeometryUpdate(.Vision(size: size))
 
 There are a few ways to get the current `UIWindowScene` in SwiftUI, but the most common — looping through `UIApplication.shared.connectedScenes` to find the key window — is risky on visionOS because window foregrounding and focus don't work like they do on other platforms.
 
-Instead, I'll link to two solutions: 
+Instead of doing that, I'll link to two better solutions: 
 
 1. Create `AppDelegate` and `SceneDelegate` classes and use them to capture a reference to your `UIWindow`, as explained in this excellent [Stack Overflow answer](https://stackoverflow.com/a/60359809) by Asperi. 
-2. Create a `UIViewRepresentable` that captures its parent `UIWindow` and passes it up the view hierarchy using a `PreferenceKey`. I'm using the **[WindowSceneReader](https://github.com/divadretlaw/WindowSceneReader)** library by David Walter, which elegantly handles all this messiness for me.
+2. Create a `UIViewRepresentable` that captures its parent `UIWindow` and passes it up the view hierarchy using a `PreferenceKey`. I'm using the [WindowSceneReader](https://github.com/divadretlaw/WindowSceneReader) library by David Walter, which elegantly handles all this messiness for me.
 
 
 ## Hide the standard window controls
