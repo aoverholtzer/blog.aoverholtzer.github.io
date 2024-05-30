@@ -234,8 +234,13 @@ private extension Node where Context == HTML.BodyContext {
                 .text("&copy; 2024 C. Adam Overholtzer"),
                 .text(" &bull; "),
                 .a(
-                    .text("Home"),
+                    .text("Apps"),
                     .href("https://overdesigned.net")
+                ),
+                .text(" &bull; "),
+                .a(
+                    .text("Merch"),
+                    .href("https://overdesigned.net/merch")
                 ),
                 .text(" &bull; "),
                 .a(
