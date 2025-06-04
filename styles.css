@@ -211,14 +211,14 @@ h1 code, h2 code, h3 code, p code, li code {
 }
 
 footer {
-    color: #bbbbbb;
+    color: black;
     font-size: 80%;
     text-align: center;
     margin: 4rem 0;
 }
 
 footer a {
-    color: #bbbbbb;
+    color: black;
 }
 
 /*@media (prefers-color-scheme: dark) {*/
