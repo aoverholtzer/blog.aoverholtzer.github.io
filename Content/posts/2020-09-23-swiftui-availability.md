@@ -220,4 +220,4 @@ struct ContentView: View {
 
 It may not be pretty, but it works. 
 
-(If you do find a more elegant solution, please [let me know](https://twitter.com/aoverholtzer).)
+(If you do find a more elegant solution, please [let me know](https://iosdev.space/@adam).)

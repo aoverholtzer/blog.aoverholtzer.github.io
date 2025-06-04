@@ -184,4 +184,4 @@ Wondering how I made the “shake” animation that’s used when a timer ends? 
 
 Still confused by `Transaction`? Check out [Transactions in SwiftUI](https://swiftwithmajid.com/2020/10/07/transactions-in-swiftui/) by Majid Jabrayilov.
 
-If you have any questions/comments/corrections, feel free to reach out to [@aoverholtzer on Twitter](https://twitter.com/aoverholtzer). And if this article has been helpful, please check out **[Time’s Up! Timer](https://overdesigned.net/timesup/)**. Thanks for reading!
+If you have any questions/comments/corrections, feel free to reach out to [@adam on Mastodon](https://iosdev.space/@adam). And if this article has been helpful, please check out **[Time’s Up! Timer](https://overdesigned.net/timesup/)**. Thanks for reading!

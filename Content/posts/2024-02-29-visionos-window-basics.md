@@ -7,7 +7,7 @@ image: /images/clocks-vision-promo.jpg
 
 <figure><img src="/images/clocks-vision-promo.jpg" alt="Screenshot of my Clocks app on Apple Vision Pro" /></figure>
 
-# Shattered Glass: Customizing Windows in visionOS
+# Customizing Windows in visionOS
 
 Developing for visionOS, it may seem like your app is stuck in a flat pane of glass. But with the right SwiftUI modifiers — and maybe a sneaky call to UIKit — we can achieve some neat effects! Read on to learn few of the windowing tricks I learned making **[Clocks](https://overdesigned.net/clocks/)** for Apple Vision Pro.
 
