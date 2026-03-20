@@ -1,1 +1,46 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><meta name="og:site_name" content="overdesigned blog"/><link rel="canonical" href="https://blog.overdesigned.net"/><meta name="twitter:url" content="https://blog.overdesigned.net"/><meta name="og:url" content="https://blog.overdesigned.net"/><title>overdesigned blog</title><meta name="twitter:title" content="overdesigned blog"/><meta name="og:title" content="overdesigned blog"/><meta name="description" content="A blog by Adam Overholtzer"/><meta name="twitter:description" content="A blog by Adam Overholtzer"/><meta name="og:description" content="A blog by Adam Overholtzer"/><meta name="twitter:card" content="summary"/><link rel="stylesheet" href="/styles.css" type="text/css"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="shortcut icon" href="/images/favicon.png" type="image/png"/><link rel="alternate" href="/feed.rss" type="application/rss+xml" title="Subscribe to overdesigned blog"/></head><body><header><div class="wrapper"><a href="/"><b>over</b>designed blog</a><p class="secondary">by <a href="https://iosdev.space/@adam">Adam Overholtzer</a></p></div></header><div class="wrapper"><ul class="item-list"><li><article><h1><a href="/posts/2024-02-29-visionos-window-basics">Customizing Windows in visionOS</a></h1><p class="secondary">February 29, 2024</p><p>Tips and tricks for working with windows and glass in visionOS.</p></article></li><li><article><h1><a href="/posts/2021-09-29-swiftui-animation-tricks">SwiftUI Animation Lessons From Building “Time’s Up! Timer”</a></h1><p class="secondary">September 29, 2021</p><p>Here are a few of the SwiftUI animation tips and tricks I’ve learned building my kid-friendly timer app Time’s Up! Timer.</p></article></li><li><article><h1><a href="/posts/2021-08-26-catalyst-status-menu">Standalone Status Menu in a Mac Catalyst App</a></h1><p class="secondary">August 26, 2021</p><p>How to create a standalone “status menu” app and embed it in your Mac Catalyst app.</p></article></li><li><article><h1><a href="/posts/2020-09-23-swiftui-availability">SwiftUI View Modifiers and if #available</a></h1><p class="secondary">September 23, 2020</p><p>Doing availability checks with SwiftUI's declarative syntax can be a little messy. Here's a custom view modifier that can help.</p></article></li></ul></div><footer><p>&copy; 2025 C. Adam Overholtzer &bull; <a href="https://overdesigned.net">Apps</a> &bull; <a href="https://overdesigned.net/merch">Merch</a> &bull; <a href="/">Blog</a> &bull; <a href="/feed.rss">RSS</a> &bull; <a href="https://iosdev.space/@adam">Contact</a></p></footer></body></html>
+<!DOCTYPE html><html lang="en"><head>
+	<script type="application/ld+json">
+	{
+	  "@context": "https://schema.org",
+	  "@type": "WebSite",
+	  "name": "Overdesigned Blog",
+	  "url": "https://blog.overdesigned.net",
+	  "description": "Writing about iOS and macOS development by Adam Overholtzer.",
+	  "author": {"@type": "Person", "name": "Adam Overholtzer", "url": "https://overdesigned.net"},
+	  "publisher": {"@type": "Organization", "name": "Overdesigned, LLC", "url": "https://overdesigned.net"},
+	  "inLanguage": "en-US"
+	}
+	</script>
+	
+	<script type="application/ld+json">
+	{
+	  "@context": "https://schema.org",
+	  "@type": "Person",
+	  "name": "Adam Overholtzer",
+	  "alternateName": "C. Adam Overholtzer",
+	  "url": "https://overdesigned.net",
+	  "email": "adam@overdesigned.net",
+	  "jobTitle": "iOS Developer",
+	  "description": "Independent iOS and macOS developer. Creator of Cheatsheet Notes, World Clock Widgets, Time's Up!, Incognito Browser, and Keyboard Switcheroo. Father of two, living in California.",
+	  "sameAs": ["https://iosdev.space/@adam", "https://www.linkedin.com/in/adam-overholtzer/", "https://github.com/aoverholtzer", "https://apps.apple.com/us/developer/overdesigned-llc/id914665832", "https://www.reddit.com/user/aoverholtzer/", "https://www.youtube.com/@overdesigned", "https://blog.overdesigned.net"],
+	  "knowsAbout": ["iOS development", "macOS development", "Swift", "SwiftUI", "App Store publishing", "iOS widget development"],
+	  "worksFor": {"@type": "Organization", "name": "Overdesigned, LLC", "url": "https://overdesigned.net"}
+	}
+	</script>
+	
+	<script type="application/ld+json">
+	{
+	  "@context": "https://schema.org",
+	  "@type": "Organization",
+	  "name": "Overdesigned, LLC",
+	  "url": "https://overdesigned.net",
+	  "email": "adam@overdesigned.net",
+	  "description": "Independent software studio creating iOS and macOS apps.",
+	  "foundingDate": "2014",
+	  "sameAs": ["https://iosdev.space/@adam", "https://www.linkedin.com/in/adam-overholtzer/", "https://github.com/aoverholtzer", "https://apps.apple.com/us/developer/overdesigned-llc/id914665832", "https://www.reddit.com/user/aoverholtzer/", "https://www.youtube.com/@overdesigned", "https://blog.overdesigned.net"],
+	  "founder": {"@type": "Person", "name": "Adam Overholtzer", "url": "https://overdesigned.net"},
+	  "logo": {"@type": "ImageObject", "url": "https://overdesigned.net/images/beard316.png", "width": 316, "height": 316}
+	}
+	</script>
+
+	<meta charset="UTF-8"/><meta name="og:site_name" content="overdesigned blog"/><link rel="canonical" href="https://blog.overdesigned.net"/><meta name="twitter:url" content="https://blog.overdesigned.net"/><meta name="og:url" content="https://blog.overdesigned.net"/><title>overdesigned blog</title><meta name="twitter:title" content="overdesigned blog"/><meta name="og:title" content="overdesigned blog"/><meta name="description" content="A blog by Adam Overholtzer"/><meta name="twitter:description" content="A blog by Adam Overholtzer"/><meta name="og:description" content="A blog by Adam Overholtzer"/><meta name="twitter:card" content="summary"/><link rel="stylesheet" href="/styles.css" type="text/css"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><link rel="shortcut icon" href="/images/favicon.png" type="image/png"/><link rel="alternate" href="/feed.rss" type="application/rss+xml" title="Subscribe to overdesigned blog"/></head><body><header><div class="wrapper"><a href="/"><b>over</b>designed blog</a><p class="secondary">by <a href="https://iosdev.space/@adam">Adam Overholtzer</a></p></div></header><div class="wrapper"><ul class="item-list"><li><article><h1><a href="/posts/2024-02-29-visionos-window-basics">Customizing Windows in visionOS</a></h1><p class="secondary">February 29, 2024</p><p>Tips and tricks for working with windows and glass in visionOS.</p></article></li><li><article><h1><a href="/posts/2021-09-29-swiftui-animation-tricks">SwiftUI Animation Lessons From Building “Time’s Up! Timer”</a></h1><p class="secondary">September 29, 2021</p><p>Here are a few of the SwiftUI animation tips and tricks I’ve learned building my kid-friendly timer app Time’s Up! Timer.</p></article></li><li><article><h1><a href="/posts/2021-08-26-catalyst-status-menu">Standalone Status Menu in a Mac Catalyst App</a></h1><p class="secondary">August 26, 2021</p><p>How to create a standalone “status menu” app and embed it in your Mac Catalyst app.</p></article></li><li><article><h1><a href="/posts/2020-09-23-swiftui-availability">SwiftUI View Modifiers and if #available</a></h1><p class="secondary">September 23, 2020</p><p>Doing availability checks with SwiftUI's declarative syntax can be a little messy. Here's a custom view modifier that can help.</p></article></li></ul></div><footer><p>&copy; 2025 C. Adam Overholtzer &bull; <a href="https://overdesigned.net">Apps</a> &bull; <a href="https://overdesigned.net/merch">Merch</a> &bull; <a href="/">Blog</a> &bull; <a href="/feed.rss">RSS</a> &bull; <a href="https://iosdev.space/@adam">Contact</a></p></footer></body></html>
