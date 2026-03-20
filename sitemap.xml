@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://blog.overdesigned.net/</loc>
+  <lastmod>2025-06-04T20:36:17+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://blog.overdesigned.net/posts/2024-02-29-visionos-window-basics/</loc>
+  <lastmod>2024-02-29T20:36:17+00:00</lastmod>
+  <priority>0.50</priority>
+</url>
+<url>
+  <loc>https://blog.overdesigned.net/posts/2021-09-29-swiftui-animation-tricks/</loc>
+  <lastmod>2021-09-29T20:36:17+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://blog.overdesigned.net/posts/2021-08-26-catalyst-status-menu/</loc>
+  <lastmod>2021-08-26T20:36:17+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://blog.overdesigned.net/posts/2020-09-23-swiftui-availability/</loc>
+  <lastmod>2020-09-23T20:36:17+00:00</lastmod>
+  <priority>0.30</priority>
+</url>
+
+
+</urlset>
